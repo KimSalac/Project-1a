@@ -1,0 +1,79 @@
+#include <cstdint>
+#include <iostream>
+#include "memory.h"
+#include "reg_file.h"
+#include "ALU.h"
+#include "control.h"
+using namespace std;
+
+void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
+
+    // Initialize ALU
+    ALU alu;
+    //Initialize Control
+    control_t control = {.reg_dest = 0, 
+                        .jump = 0,
+                        .branch = 0,
+                        .mem_read = 0,
+                        .mem_to_reg = 0,
+                        .ALU_op = 0,
+                        .mem_write = 0,
+                        .ALU_src = 0,
+                        .reg_write = 0};
+    
+    uint32_t num_cycles = 0;
+    uint32_t num_instrs = 0; 
+
+    /*while (reg_file.pc != end_pc) {
+
+        // fetch
+        uint32_t instruction;
+        memory.access(reg_file.pc, instruction, 0, 1, 0);
+        cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
+        // increment pc
+        reg_file.pc += 4;
+        
+        // TODO: fill in the function argument
+        // decode into contol signals
+        control.decode(0b00000000000000000000000000000000);
+        control.print(); // used for autograding
+
+        
+        // TODO: fill in the function argument
+        // Read from reg file
+        //reg_file.access(  );
+        
+        
+        // TODO: fill in the function argument
+        // Execution 
+        //alu.generate_control_inputs(  );
+        
+        
+        // TODO: fill in the function argument
+        //uint32_t alu_result = alu.execute(  );
+        
+        // Memory
+        // TODO: fill in the function argument
+        //memory.access(  );
+        
+        // Write Back
+        // TODO: fill in the function argument
+        //reg_file.access(  );
+        
+        
+        // TODO: Update PC
+
+
+        cout << "CYCLE" << num_cycles << "\n";
+        reg_file.print(); // used for automated testing
+
+        num_cycles++;
+        num_instrs++;
+
+    }
+
+    cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";*/
+     control.decode(0b00000001010010110100100000100000);
+     control.print();
+
+}
