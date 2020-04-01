@@ -1,9 +1,13 @@
 #include <cstdint>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
 #include "memory.h"
 #include "reg_file.h"
 #include "ALU.h"
 #include "control.h"
+
 using namespace std;
 
 void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
@@ -73,7 +77,26 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
     }
 
     cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";*/
-     control.decode(0b00000001010010110100100000100000);
-     control.print();
+    
+    /*Temporary Tests for control signals*/
+    uint32_t instruct;
+    
+    ifstream inFile;
+    inFile.open("controlhex.txt");
 
+    if(!inFile)
+      {
+	cout << "Unable to open file";
+	exit(1);
+      }
+    string temp;
+    while (std::getline(inFile, temp))
+      {
+	std::stringstream ss(temp);
+	ss >> hex >> instruct;
+	cout << "----Instruction: " << temp << "----" << endl;
+	control.decode(instruct);
+	control.print();
+    }
+    inFile.close();
 }

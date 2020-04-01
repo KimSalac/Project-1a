@@ -43,26 +43,27 @@ struct control_t {
     mem_write = 0;
     ALU_src = 0;
     reg_write = 0;
-      
+
+    uint32_t temp = instruction;
       bool rType = !(instruction >> 26);
-      bool jr = rType && (((instruction >> 16) & 0x1f) == 0x08);
-      bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011);
-      bool store = ((instruction >> 26) == 0b001011) || ((instruction >> 26) == 0b111000) || ((instruction >> 26) == 0b101001) || ((instruction >> 26) == 0b101011);
+      bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011) || ((instruction >> 26) == 0b110000);
+      bool store = ((instruction >> 26) == 0b101000) || ((instruction >> 26) == 0b111000) || ((instruction >> 26) == 0b101001) || ((instruction >> 26) == 0b101011);
       bool jumps = ((instruction >> 26) == 0x02) || ((instruction >> 26) == 0x03);
       bool beqne = ((instruction >> 26) == 0b100) || ((instruction >> 26) == 0b101);
       bool iType = !(rType || load || store || jumps || beqne);
 
       if(rType) // sets signals for all r-type instructions
 	{
-	  if(jr) // detects exception of jumpregister
+	  if((instruction & 0x1f) == 0x08) // detects exception of jumpregister
 	    {
 	      reg_dest = 0;
+	      jump = 1;
+	      reg_write = 1;
 	    }
 	  else
 	    {
 	      reg_dest = 1;
 	    }
-	  reg_write = 1;
 	  ALU_op = 0b10;
 	}
 
@@ -92,29 +93,31 @@ struct control_t {
 	  mem_to_reg = 1;
 	  ALU_src = 1;
 	  reg_write = 1;
+	  ALU_op = 0b00;
 	  
-	  if(((instruction >> 26) == 0b100011)) //except lw
+	  /*if(((instruction >> 26) == 0b100011)) //except lw
 	    {
 	      ALU_op = 0b00;
 	    }
 	  else
 	    {
 	      ALU_op = 0b11;
-	    }
+	      }*/
 	}
 
       if(store) //sets signals for all store  instructions
 	{
 	  mem_write = 1;
 	  ALU_src = 1;
-	  if(((instruction >> 26) == 0b101011)) //except sw
+	  ALU_op = 0b00;
+	  /*if(((instruction >> 26) == 0b101011)) //except sw
 	    {
 	      ALU_op = 0b00;
 	    }
 	  else
 	    {
 	      ALU_op = 0b11;
-	    }
+	      }*/
 	}
 
       if(iType)
