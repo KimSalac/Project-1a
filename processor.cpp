@@ -44,7 +44,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         control.decode(instruction);
         cout<< "Intstructuon: "<< instruction<<endl;
         control.print(); // used for autograding
-
+        uint32_t data_write; //varable for data to be written 
         
         // TODO: fill in the function argument
         // Read from reg file
@@ -67,21 +67,27 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           //  rt_b = rt_b >>16;
         int rt_num = (int32_t) rt_b; //convert rt to int
         cout<<"Rt_num: "<<rt_num<<endl;
-
+        uint32_t data_rs; //varaible for data of rs
+        uint32_t data_rt; //varaible for data of rt
          //get opcode
         uint32_t op = instruction >> 26;
         cout<<"op: "<<op<<endl;
-        if (op == 0){ //if r-type
+        if (op == 0){ //if r-type -- NOT COVER SHIFT LEFT OR RIGHT LOGICAL, OR JUMP REG
             uint32_t rd_b = instruction <<16; //get rid of op, rs, rt
             cout<<"Rd_b: "<<rd_b<<endl;
             rd_b = rd_b >>27; //get rid of shamt, funct
             cout<<"Rd_b: "<<rd_b<<endl;
             int rd_num = (int32_t) rd_b; //convert rd to int
             cout<<"Rd_num: "<<rd_num<<endl;
+            reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 0, data_write);
+            cout<<"rs_data: "<<data_rs<<endl;
+            cout<<"rt_data: "<<data_rt<<endl;
         }
-
-        //reg_file.access();
-        
+        else{ //if I type - NOT COVER BEQ, LUI, STORES
+          reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
+          cout<<"rs_data: "<<data_rs<<endl;
+          //cout<<"rt_data: "<<data_rt<<endl;
+        }
         
         // TODO: fill in the function argument
         // Execution 
