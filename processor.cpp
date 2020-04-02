@@ -48,6 +48,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // Read from reg file
         uint32_t rs = instruction >> 21;
         rs = rs << 6;
+        
          uint32_t rt = instruction >> 16;
          rt = rt <<11;
          //reg_file.
