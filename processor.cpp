@@ -48,12 +48,38 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         
         // TODO: fill in the function argument
         // Read from reg file
-        uint32_t rs = instruction >> 21;
-        rs = rs << 6;
         
-         uint32_t rt = instruction >> 16;
-         rt = rt <<11;
-         //reg_file.
+        //get rs
+        uint32_t rs_b = instruction << 6; //get rid of opcode
+        cout<<"RS_B: "<<rs_b<<endl;
+        rs_b = rs_b >> 27; //get rs
+        cout<<"RS_B: "<<rs_b<<endl;
+          //rs_b = rs_b >> 6;
+          //cout<<"RS_B: "<<rs_b<<endl;
+        int32_t rs_num = (int32_t) rs_b; //convert rs to int
+        cout<<"RS_num: "<<rs_num<<endl;
+        
+        //get rt
+        uint32_t rt_b = instruction << 11; //get rid of opcode and rs
+          //cout<<"Rt_B: "<<rt_b<<endl;
+        rt_b = rt_b >>27; //get rt
+          //cout<<"Rt_B: "<<rt_b<<endl;
+          //  rt_b = rt_b >>16;
+        int rt_num = (int32_t) rt_b; //convert rt to int
+        cout<<"Rt_num: "<<rt_num<<endl;
+
+         //get opcode
+        uint32_t op = instruction >> 26;
+        cout<<"op: "<<op<<endl;
+        if (op == 0){ //if r-type
+            uint32_t rd_b = instruction <<16; //get rid of op, rs, rt
+            cout<<"Rd_b: "<<rd_b<<endl;
+            rd_b = rd_b >>27; //get rid of shamt, funct
+            cout<<"Rd_b: "<<rd_b<<endl;
+            int rd_num = (int32_t) rd_b; //convert rd to int
+            cout<<"Rd_num: "<<rd_num<<endl;
+        }
+
         //reg_file.access();
         
         
