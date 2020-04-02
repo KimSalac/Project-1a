@@ -8,14 +8,16 @@ using namespace std;
 // Control signals for the processor
 struct control_t {
     bool reg_dest;           // 0 if rt, 1 if rd
-    bool jump;               // 1 if jummp
+    bool jump;               // 1 if jummp Register
     bool branch;             // 1 if branch
     bool mem_read;           // 1 if memory needs to be read
-    bool mem_to_reg;         // 1 if memory needs to written to reg
+    unsigned mem_to_reg : 2; // 1 if memory needs to written to reg
     unsigned ALU_op : 2;     // 10 for R-type, 00 for LW/SW, 01 for BEQ/BNE, 11 for others
     bool mem_write;          // 1 if needs to be written to memory
     bool ALU_src;            // 0 if second operand is from reg_file, 1 if imm
     bool reg_write;          // 1 if need to write back to reg file
+	unsigned store_reg : 2;				// dealing specifically with sh and asb
+	bool sign_zero;			// sign-extended or zero-extended
     
     void print() {      // Prints the generated contol signals
         cout << "REG_DEST: " << reg_dest << "\n";
@@ -27,6 +29,8 @@ struct control_t {
         cout << "MEM_WRITE: " << mem_write << "\n";
         cout << "ALU_SRC: " << ALU_src << "\n";
         cout << "REG_WRITE: " << reg_write << "\n";
+		cout << "STORE_REG: " << store_reg << "\n";
+		cout << "SIGN_ZERO: " << sign_zero << "\n";
     }
     // TODO:
     // Decode instructions into control signals
@@ -38,23 +42,23 @@ struct control_t {
     jump = 0;
     branch = 0;
     mem_read = 0;
-    mem_to_reg = 0;
-    ALU_op = 0b10;
+    mem_to_reg = 0b00;
+    ALU_op = 0b00;
     mem_write = 0;
     ALU_src = 0;
     reg_write = 0;
+	store_reg = 0b00;
+	sign_zero = 0;
 
-    uint32_t temp = instruction;
-	//cout<<"int: "<<instruction<<endl;
       bool rType = !(instruction >> 26);
       bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011) || ((instruction >> 26) == 0b110000);
-      bool store = ((instruction >> 26) == 0b101000) || ((instruction >> 26) == 0b111000) || ((instruction >> 26) == 0b101001) || ((instruction >> 26) == 0b101011);
+      bool store = ((instruction >> 26) == 0b101000) || ((instruction >> 26) == 0b101001) || ((instruction >> 26) == 0b101011);
       bool jumps = ((instruction >> 26) == 0x02) || ((instruction >> 26) == 0x03);
       bool beqne = ((instruction >> 26) == 0b100) || ((instruction >> 26) == 0b101);
       bool iType = !(rType || load || store || jumps || beqne);
 
-      if(rType) // sets signals for all r-type instructions
-	{ 
+    if(rType) // good: sets signals for all r-type instructions
+	{
 	  if((instruction & 0x1f) == 0x08) // detects exception of jumpregister
 	    {
 	      reg_dest = 0;
@@ -68,7 +72,7 @@ struct control_t {
 	  ALU_op = 0b10;
 	}
 
-      if(jumps) //sets signals for all jump  instructions
+    /*if(jumps) //sets signals for all jump  instructions
 	{
 	  jump = 1;
 	  if((instruction >> 26) == 0x02)
@@ -80,45 +84,60 @@ struct control_t {
 	      reg_write = 1;
 	    }
 	  ALU_op = 0b11;
-	}
+	}*/
 
-      if(beqne) //sets signals for all branch  instructions
+    if(beqne) //good: sets signals for all branch  instructions
 	{
 	  branch = 1;
 	  ALU_op = 0b01;
 	}
 
-      if(load) //sets signals for all loads  instructions
+    if(load) //good: sets signals for all loads  instructions
 	{
+		if((instruction >> 26) == 0b100100) // lbu
+		{
+			mem_to_reg = 0b10;
+		}
+		if((instruction >> 26) == 0b100101) // lhu
+		{
+			mem_to_reg = 0b11;
+		}
+		if((instruction >> 26) == 0b001111) // lui
+		{
+			mem_to_reg = 0b00;
+		}
+		if((instruction >> 26) == 0b100011) // lw
+		{
+			mem_to_reg = 0b01;
+		}
+		if((instruction >> 26) == 0b110000) //ll
+		{
+			mem_to_reg = 0b01;
+		}
+
 	  mem_read = 1;
-	  mem_to_reg = 1;
 	  ALU_src = 1;
 	  reg_write = 1;
 	  ALU_op = 0b00;
-	  
-	  /*if(((instruction >> 26) == 0b100011)) //except lw
-	    {
-	      ALU_op = 0b00;
-	    }
-	  else
-	    {
-	      ALU_op = 0b11;
-	      }*/
 	}
 
-      if(store) //sets signals for all store  instructions
+    if(store) //sets signals for all store  instructions
 	{
 	  mem_write = 1;
 	  ALU_src = 1;
 	  ALU_op = 0b00;
-	  /*if(((instruction >> 26) == 0b101011)) //except sw
+	  if((instruction >> 26) == 0b101011) //sw
 	    {
-	      ALU_op = 0b00;
+	      store_reg = 0b10;
 	    }
-	  else
+	  	else if((instruction >> 26) == 0b101000) // sb
 	    {
-	      ALU_op = 0b11;
-	      }*/
+	      store_reg = 0b01;
+		}
+		else if((instruction >> 26) == 0b101001) // sh
+		{
+		  store_reg = 0b00;
+		}
 	}
 
       if(iType)
@@ -126,6 +145,10 @@ struct control_t {
 	  ALU_op = 0b11;
 	  ALU_src = 1;
 	  reg_write = 1;
+	  if(((instruction >> 26) == 0b001100) || ((instruction >> 26) == 0b001101)) // andi or ori
+	  {
+		  sign_zero = 1;
+	  }
 	}
     }	
 };
