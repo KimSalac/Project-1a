@@ -101,9 +101,6 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         alu.generate_control_inputs( control.ALU_op, funct, op);
         //cout<<"alu control: "<<alu.ALU_control_inputs<<endl;
         alu.print();
-        
-        
-        // TODO: fill in the function argument
         uint32_t alu_zero;
         uint32_t alu_result;
         if (op == 0){ //if rtype

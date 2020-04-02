@@ -11,6 +11,7 @@ class ALU {
         // Generate the control inputs for the ALU
         void generate_control_inputs(int ALU_op, int funct, int opcode) {        
             if (opcode == 0){ // if rtype
+            //std::cout<<"funct: "<<std::bitset<32>funct<<std::endl;
                 if (funct ==  0b100000){ //rtype Add
                     ALU_control_inputs = 2;//0010;
                 }
@@ -55,7 +56,7 @@ class ALU {
         
         // TODO:
         // execute ALU operations, generate result, and set the zero control signal if necessary
-        uint32_t execute(uint32_t operand_1, uint32_t operand_2, uint32_t &ALU_zero) {
+        uint32_t execute(uint32_t operand_1, uint32_t operand_2, uint32_t &ALU_zero) { //havent set up alu_zero
             uint32_t output;
             if(ALU_control_inputs == 2){ //add op
             //std::cout<<"o: "<<(int32_t) operand_1<<std::endl;
