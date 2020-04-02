@@ -10,7 +10,7 @@ class Registers {
     public:
         uint32_t pc;
         Registers() {
-            R.resize(32,0);
+            R.resize(32,0); 
         }
 	// read_reg_1, read_reg_2 are register numbers from which the data should be read
 	// read_data_1, read_data_2 are variables into which the data is read. These are passed by reference
