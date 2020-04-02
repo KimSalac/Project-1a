@@ -23,7 +23,9 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
                         .ALU_op = 0,
                         .mem_write = 0,
                         .ALU_src = 0,
-                        .reg_write = 0};
+                        .reg_write = 0,
+                        .store_reg = 0,
+                        .sign_zero = 0};
     
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
