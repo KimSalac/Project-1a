@@ -10,7 +10,7 @@ class ALU {
         // TODO:
         // Generate the control inputs for the ALU
         void generate_control_inputs(int ALU_op, int funct, int opcode) {
-        
+            
         }
         
         // TODO:

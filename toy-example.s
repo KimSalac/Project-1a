@@ -7,9 +7,8 @@
 __start:
    add $1, $2, $3
    addi $2, $1, 5
-   beq  $1, $2, label
-   sub $2, $2, $3
-label:
-   or $4, $5, $6
+   add $1, $2, $3
+   addi $1, $2, 3
+   addi $1, $2, 3
 	.end	__start
 	.size	__start, .-__start
