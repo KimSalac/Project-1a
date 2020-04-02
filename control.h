@@ -45,6 +45,7 @@ struct control_t {
     reg_write = 0;
 
     uint32_t temp = instruction;
+	//cout<<"int: "<<instruction<<endl;
       bool rType = !(instruction >> 26);
       bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011) || ((instruction >> 26) == 0b110000);
       bool store = ((instruction >> 26) == 0b101000) || ((instruction >> 26) == 0b111000) || ((instruction >> 26) == 0b101001) || ((instruction >> 26) == 0b101011);
@@ -53,7 +54,7 @@ struct control_t {
       bool iType = !(rType || load || store || jumps || beqne);
 
       if(rType) // sets signals for all r-type instructions
-	{
+	{ 
 	  if((instruction & 0x1f) == 0x08) // detects exception of jumpregister
 	    {
 	      reg_dest = 0;

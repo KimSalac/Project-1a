@@ -28,7 +28,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
 
-    /*while (reg_file.pc != end_pc) {
+    while (reg_file.pc != end_pc) {
 
         // fetch
         uint32_t instruction;
@@ -39,13 +39,19 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         
         // TODO: fill in the function argument
         // decode into contol signals
-        control.decode(0b00000000000000000000000000000000);
+        control.decode(instruction);
+        cout<< "Intstructuon: "<< instruction<<endl;
         control.print(); // used for autograding
 
         
         // TODO: fill in the function argument
         // Read from reg file
-        //reg_file.access(  );
+        uint32_t rs = instruction >> 21;
+        rs = rs << 6;
+         uint32_t rt = instruction >> 16;
+         rt = rt <<11;
+         //reg_file.
+        //reg_file.access();
         
         
         // TODO: fill in the function argument
@@ -68,18 +74,19 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: Update PC
 
 
-        cout << "CYCLE" << num_cycles << "\n";
-        reg_file.print(); // used for automated testing
+        //cout << "CYCLE" << num_cycles << "\n";
+        //reg_file.print(); // used for automated testing
 
         num_cycles++;
-        num_instrs++;
+        num_instrs++; 
+        cout<<"# in: "<< num_instrs<<endl;
 
     }
 
-    cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";*/
+    //cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
     
     /*Temporary Tests for control signals*/
-    uint32_t instruct;
+    /* uint32_t instruct;
     
     ifstream inFile;
     inFile.open("controlhex.txt");
@@ -98,5 +105,5 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 	control.decode(instruct);
 	control.print();
     }
-    inFile.close();
+    inFile.close(); */
 }
