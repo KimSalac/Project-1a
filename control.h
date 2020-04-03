@@ -18,7 +18,7 @@ struct control_t {
     bool reg_write;          // 1 if need to write back to reg file
 	unsigned store_reg : 2;				// dealing specifically with sh and asb
 	bool sign_zero;			// sign-extended or zero-extended
-	bool bne;
+	bool beq;
     
     void print() {      // Prints the generated contol signals
         cout << "REG_DEST: " << reg_dest << "\n";
@@ -32,7 +32,7 @@ struct control_t {
         cout << "REG_WRITE: " << reg_write << "\n";
 		cout << "STORE_REG: " << store_reg << "\n";
 		cout << "SIGN_ZERO: " << sign_zero << "\n";
-		cout << "BNE: " << bne << "\n";
+		cout << "BEQ: " << beq << "\n";
     }
     // TODO:
     // Decode instructions into control signals
@@ -51,7 +51,7 @@ struct control_t {
     reg_write = 0;
 	store_reg = 0b00;
 	sign_zero = 0;
-	bne = 0; //1 if bne, 0 if beq
+	beq = 0; //1 if beq, 0 if bne
 
       bool rType = !(instruction >> 26);
       bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011) || ((instruction >> 26) == 0b110000);
@@ -94,11 +94,11 @@ struct control_t {
 	{
 		if((instruction >> 26) == 0b000100)
 		{
-			bne = 0;
+			beq = 1;
 		}
 		else
 		{
-			bne = 1;
+			beq = 0;
 		}
 
 	  branch = 1;
