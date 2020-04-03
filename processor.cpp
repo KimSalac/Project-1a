@@ -29,7 +29,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
     
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
-
+    /*
     while (reg_file.pc != end_pc) {
 
         // fetch
@@ -37,13 +37,13 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         memory.access(reg_file.pc, instruction, 0, 1, 0);
         cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // increment pc
-        reg_file.pc += 4;
+        reg_file.pc += 1;
         
         // TODO: fill in the function argument
         // decode into contol signals
         control.decode(instruction);
-        cout<< "Intstructuon: "<< instruction<<endl;
-        control.print(); // used for autograding
+        cout<< "Instruction: " << instruction <<endl;
+        //control.print(); // used for autograding
         uint32_t data_write; //varable for data to be written 
         
         // TODO: fill in the function argument
@@ -56,6 +56,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         //cout<<"RS_B: "<<rs_b<<endl;
           //rs_b = rs_b >> 6;
           //cout<<"RS_B: "<<rs_b<<endl;
+
         int32_t rs_num = (int32_t) rs_b; //convert rs to int
         cout<<"RS_num: "<<rs_num<<endl;
         
@@ -73,12 +74,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
        
         //get opcode
         uint32_t op = instruction >> 26;
-        cout<<"op: "<<op<<endl;
+        cout<<"op: "<< op <<endl;
         uint32_t funct = instruction << 26;
         funct = funct >>26;
         cout<<"funct: "<<funct<<endl;
         if (op == 0){ //if r-type -- NOT COVER SHIFT LEFT OR RIGHT LOGICAL, OR JUMP REG
-            uint32_t rd_b = instruction <<16; //get rid of op, rs, rt
+            uint32_t rd_b = instruction << 16; //get rid of op, rs, rt
             rd_b = rd_b >>27; //get rid of shamt, funct
             //cout<<"Rd_b: "<<rd_b<<endl;
             int rd_num = (int32_t) rd_b; //convert rd to int
@@ -95,7 +96,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           cout<<"rs_data: "<<data_rs<<endl;
           //cout<<"rt_data: "<<data_rt<<endl;
         }
-        
+      
         // TODO: fill in the function argument
         // Execution 
         alu.generate_control_inputs( control.ALU_op, funct, op);
@@ -110,7 +111,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           alu_result = alu.execute(data_rs, data_i, alu_zero);
         }
         int32_t r = (int32_t) alu_result;
-        cout<<"alu result: "<<r<<endl;
+        cout<<"alu result: "<< r <<endl;
         
         // Memory
         // TODO: fill in the function argument
@@ -131,29 +132,49 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         num_instrs++; 
         cout<<"# in: "<< num_instrs<<endl;
 
-    }
+    }*/
 
     //cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
     
     /*Temporary Tests for control signals*/
-    /* uint32_t instruct;
     
+    uint32_t instruction;
+    uint32_t op;
+    uint32_t funct;
+    uint32_t ALU_zero = 0;
+    uint32_t result;
     ifstream inFile;
+
     inFile.open("controlhex.txt");
 
     if(!inFile)
       {
-	cout << "Unable to open file";
-	exit(1);
+	      cout << "Unable to open file";
+	      exit(1);
       }
     string temp;
     while (std::getline(inFile, temp))
       {
-	std::stringstream ss(temp);
-	ss >> hex >> instruct;
-	cout << "----Instruction: " << temp << "----" << endl;
-	control.decode(instruct);
-	control.print();
+	      std::stringstream ss(temp);
+	      ss >> hex >> instruction;
+	      cout << "----Instruction: " << temp << "----" << endl;
+	      control.decode(instruction); //decodes instruction
+        //control.print(); //prints control signals
+
+
+        op = instruction >> 26;
+        cout<<"op: "<< op <<endl;
+        funct = instruction << 26;
+        funct = funct >> 26;
+        cout<<"funct: "<< funct <<endl;
+        alu.generate_control_inputs(control.ALU_op, funct, op);
+        result = alu.execute(1, 1, ALU_zero);
+
+        alu.print();
+        cout << "ALU_zero: " << ALU_zero << endl;
+        cout << "Result of ALU operation: " << result << endl;
+        cout  << "---------------------------" << endl;
+        ALU_zero = 0;
     }
-    inFile.close(); */
+    inFile.close();
 }

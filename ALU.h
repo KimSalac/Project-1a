@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
+using namespace std;
 class ALU {
     private:
         int ALU_control_inputs;
@@ -12,40 +13,61 @@ class ALU {
         void generate_control_inputs(int ALU_op, int funct, int opcode) {        
             if (opcode == 0){ // if rtype
             //std::cout<<"funct: "<<std::bitset<32>funct<<std::endl;
-                if (funct ==  0b100000){ //rtype Add
+                if (funct ==  0b100000 || funct == 0b100001){ //rtype Add
                     ALU_control_inputs = 2;//0010;
+                    //cout<< "rtype add" << endl;
                 }
-                else if (funct ==  0b100010){ //rtype sub
+                else if (funct ==  0b100010 || funct == 0b100011){ //rtype sub
                     ALU_control_inputs = 6;//0110;
+                    //cout<< "rtype sub" << endl;
                 }
-                else if (funct ==  0b100100){ //rtype and
+                else if (funct ==  0b100100)
+                { //rtype and
                     ALU_control_inputs = 0000;
-                }else if (funct ==  0b100101){ //rtype or
+                    cout<< "rtype add" << endl;
+                }else if (funct ==  0b100101){
+                     //rtype or
                     ALU_control_inputs = 0001;
+                    cout<< "rtype add" << endl;
                 }
-                else if (funct ==  0b101010){ //rtype set on less than
+                else if (funct ==  0b101010)
+                { //rtype set on less than
                     ALU_control_inputs = 7;//0111;
+                    //cout<< "rtype add" << endl;
+                }
+                else if(funct == 0x27) //nor
+                {
+                    ALU_control_inputs = 12;
+                }
+                else if (funct == 0b010) // srl
+                {
+                    ALU_control_inputs = 3;
+                }
+                else if (funct == 0b00) // sll
+                {
+                    ALU_control_inputs = 4;
                 }
             }
             else{ //I type and j type
             std::cout<<"opcode: "<<opcode<<std::endl;
-                if (ALU_op == 00){ //for lw and sw
+                if (ALU_op == 00){ //for loads and stores
                     ALU_control_inputs = 2;//0010;
+                    //cout<< "load/store" << endl;
                 }
-                else if (ALU_op == 01){//beq
+                else if(ALU_op == 01){//beq and bne
                     ALU_control_inputs = 6;//0110;
+                    //cout<< "rtype add" << endl;
                 }
-                //else { //itype add, sub, and, or, set less than
-                     //ALU_control_inputs = ALU_op;
-                //}
-                else if(opcode == 12){//itype and
+                /*Below are all misc I-types*/
+                else if(opcode == 12){//itype andi
                     ALU_control_inputs = 0000;
+                    //cout<< "itype and" << endl;
                 }
-                else if(opcode == 8){//itype add
+                else if(opcode == 8 || opcode == 9){//itype addi and addiu
                     ALU_control_inputs = 2;
-                    std::cout<<"itype add"<<std::endl;
+                    //std::cout<<"itype add"<<std::endl;
                 }
-                else if(opcode == 13){//itype or
+                else if(opcode == 13){//itype ori and orriu
                     ALU_control_inputs = 1;
                 }
                 else{ //itype set less than
@@ -64,7 +86,16 @@ class ALU {
                return output =  operand_1 + operand_2;
             }
             else if(ALU_control_inputs == 6){ //sub op
-                return output =  operand_1 - operand_2;
+                output =  operand_1 - operand_2;
+                if(output == 0)
+                {
+                    ALU_zero = 1;
+                }
+                else
+                {
+                    ALU_zero = 0;
+                }
+                return output;
             }
             else if(ALU_control_inputs == 0){ //and op
                 return output =  operand_1 & operand_2;
@@ -82,11 +113,20 @@ class ALU {
                     return 0;
                 }
             }
+            else if(ALU_control_inputs == 12){ // nor
+                return !(operand_1 | operand_2);
+            }
+            else if(ALU_control_inputs == 4){ // sll
+                return operand_1 << operand_2;
+            }
+            else if(ALU_control_inputs == 3){ // srl
+                return operand_2 >> operand_1;
+            }
         return 0;
         }
         
         void print(){ //print method to make sure the control singals are correct
-            std::cout<<"alu control: "<<ALU_control_inputs<<std::endl;
+            std::cout<<"alu control: " << ALU_control_inputs << std::endl;
         }
             
 };
