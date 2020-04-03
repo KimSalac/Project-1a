@@ -35,11 +35,11 @@ class ALU {
                     ALU_control_inputs = 7;//0111;
                     //cout<< "rtype add" << endl;
                 }
-                else if(funct == 0x27) //nor
+                else if(funct == 0b010) //srl
                 {
                     ALU_control_inputs = 12;
                 }
-                else if (funct == 0b010) // srl
+                else if (funct == 0x27) // nor
                 {
                     ALU_control_inputs = 3;
                 }
@@ -113,14 +113,14 @@ class ALU {
                     return 0;
                 }
             }
-            else if(ALU_control_inputs == 12){ // nor
-                return !(operand_1 | operand_2);
+            else if(ALU_control_inputs == 12){ // srl
+                return operand_2 >> operand_1;
             }
             else if(ALU_control_inputs == 4){ // sll
                 return operand_1 << operand_2;
             }
-            else if(ALU_control_inputs == 3){ // srl
-                return operand_2 >> operand_1;
+            else if(ALU_control_inputs == 3){ // nor
+                return !(operand_1 | operand_2);
             }
         return 0;
         }
