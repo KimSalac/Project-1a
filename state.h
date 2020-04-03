@@ -47,7 +47,6 @@ struct MEMWB {
 };
 
 struct state_t {
-    string state; //name of the state currently in
     uint32_t pc;
     IFID ifid;
     IDEX idex;
