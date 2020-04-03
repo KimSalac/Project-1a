@@ -70,7 +70,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         uint32_t data_rs; //varaible for data of rs
         uint32_t data_rt; //varaible for data of rt
         uint32_t data_i; //variable for data of imm
-       
+        int rd_num; //var for rd reg #
         //get opcode
         uint32_t op = instruction >> 26;
         cout<<"op: "<<op<<endl;
@@ -81,7 +81,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             uint32_t rd_b = instruction <<16; //get rid of op, rs, rt
             rd_b = rd_b >>27; //get rid of shamt, funct
             //cout<<"Rd_b: "<<rd_b<<endl;
-            int rd_num = (int32_t) rd_b; //convert rd to int
+            rd_num = (int32_t) rd_b; //convert rd to int
             cout<<"Rd_num: "<<rd_num<<endl;
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 0, data_write);
             cout<<"rs_data: "<<data_rs<<endl;
@@ -111,13 +111,29 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         }
         int32_t r = (int32_t) alu_result;
         cout<<"alu result: "<<r<<endl;
+        data_write = alu_result;
+
         
         // Memory
         // TODO: fill in the function argument
-        //memory.access(  );
+        if (control.mem_read == 1 || control.mem_write == 1){
+          memory.access(data_i,data_rs,data_write,control.mem_read, control.mem_write);
+        }
+
         
         // Write Back
         // TODO: fill in the function argument
+        if (control.reg_write == 1){
+          if(control.reg_dest == 0){ //write to rt
+          cout<<"write to rt"<<endl;
+            reg_file.access(rs_num, 0, data_rs, data_rs, rt_num, 1, data_write);
+          }
+          else if(control.reg_dest == 1){ //write to rd
+          cout<<"write to rd"<<endl;
+            reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
+          }
+          
+        }
         //reg_file.access(  );
         
         
@@ -125,7 +141,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
 
         //cout << "CYCLE" << num_cycles << "\n";
-        //reg_file.print(); // used for automated testing
+        reg_file.print(); // used for automated testing
 
         num_cycles++;
         num_instrs++; 

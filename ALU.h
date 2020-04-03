@@ -26,6 +26,9 @@ class ALU {
                 else if (funct ==  0b101010){ //rtype set on less than
                     ALU_control_inputs = 7;//0111;
                 }
+                else if (funct ==  39){ //rtype nor
+                    ALU_control_inputs = 3;
+                }
             }
             else{ //I type and j type
             std::cout<<"opcode: "<<opcode<<std::endl;
@@ -43,7 +46,7 @@ class ALU {
                 }
                 else if(opcode == 8){//itype add
                     ALU_control_inputs = 2;
-                    std::cout<<"itype add"<<std::endl;
+                    //std::cout<<"itype add"<<std::endl;
                 }
                 else if(opcode == 13){//itype or
                     ALU_control_inputs = 1;
@@ -81,6 +84,13 @@ class ALU {
                 else{
                     return 0;
                 }
+            }
+            else if(ALU_control_inputs == 3){ //nor
+                uint32_t r = (operand_1) | (operand_2);
+                //std::cout<<"or: "<<r<<std::endl;
+                uint32_t n = ~r;
+                 //std::cout<<"~r: "<<n<<std::endl;
+                return output = (n);
             }
         return 0;
         }
