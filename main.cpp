@@ -126,7 +126,6 @@ int main(int argc, char *argv[]) {
               exit(0);
           case 'b':
               end_pc = load(optarg, memory);
-              cout<<"end_pc: "<< end_pc<<endl;
               break;
           case 'p':
               // TODO: Redirect control to the appropriate processor implementation. 
