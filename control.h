@@ -30,9 +30,9 @@ struct control_t {
         cout << "MEM_WRITE: " << mem_write << "\n";
         cout << "ALU_SRC: " << ALU_src << "\n";
         cout << "REG_WRITE: " << reg_write << "\n";
-		cout << "STORE_REG: " << store_reg << "\n";
-		cout << "SIGN_ZERO: " << sign_zero << "\n";
-		cout << "BEQ: " << beq << "\n";
+		//cout << "STORE_REG: " << store_reg << "\n";
+		//cout << "SIGN_ZERO: " << sign_zero << "\n";
+		//cout << "BEQ: " << beq << "\n";
     }
     // TODO:
     // Decode instructions into control signals
