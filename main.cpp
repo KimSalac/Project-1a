@@ -52,7 +52,7 @@ uint32_t load(char *bmk, Memory &memory)
       if ((shdr.sh_flags & SHF_EXECINSTR) != 0 && shdr.sh_addr == 0) { /* Text section -- we hardcoded this to zero during compilation. */
           binary_copy = fopen(bmk, "r");
           fseek(binary_copy, shdr.sh_offset, SEEK_SET);
-          for (int j = 0; j < shdr.sh_size; j += 4) {
+          for (int j = 0; j < shdr.sh_size; j += 4) {              
               num_read = fread(&word, 1, 4, binary_copy);
               if (num_read != 4) {
                   cout << "Could not populate memory from section: " << shdr.sh_addr <<
@@ -84,14 +84,14 @@ void print_help()
             "--help                               Print this help message\n";
 }
 
-int main(/*int argc, char *argv[]*/) {
+int main(int argc, char *argv[]) {
 
-  /*Test*/
-  Registers tempR;
+  /*Test
+   Registers tempR;
   Memory tempM;
-  processor_main_loop(tempR, tempM, 0);
-  
-  /*static struct option long_options[] = {
+  processor_main_loop(tempR, tempM, 0);*/
+
+  static struct option long_options[] = {
       {"bmk", required_argument, 0, 'b'},
       {"processor", required_argument, 0, 'p'},
       {"help", no_argument, 0, 'h'}
@@ -126,12 +126,13 @@ int main(/*int argc, char *argv[]*/) {
               exit(0);
           case 'b':
               end_pc = load(optarg, memory);
+              cout<<"end_pc: "<< end_pc<<endl;
               break;
           case 'p':
-              /* TODO: Redirect control to the appropriate processor implementation. 
+              // TODO: Redirect control to the appropriate processor implementation. 
               processor_type = string(optarg);
               processor_main_loop(reg_file, memory, end_pc);
              break;
       }
-      }*/
+      }
 }
