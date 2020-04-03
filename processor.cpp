@@ -104,7 +104,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           if(op == 0b001100 || op == 0b001101) //logic operations
           {
             reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
-            data_i = data_i & 0x0000ffff // zero extends first 16 bits
+            data_i = data_i & 0x0000ffff; // zero extends first 16 bits
           }
           else if(op == 0b001111) // lui
           {
@@ -116,11 +116,11 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             reg_file.access(rs_num, rt_num, data_rs, data_rt, 0, 0, data_write);
             if(control.store_reg == 0b01) // sb
             {
-              data_rt = data_rt & 0x000000ff // only takes lower 8 bits
+              data_rt = data_rt & 0x000000ff; // only takes lower 8 bits
             }
             else if(control.store_reg == 0b00) // sh
             {
-              data_rt = data_rt & 0x0000ffff // only takes lower 16 bits
+              data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
             }  
             cout << "rt_data for stores: " << data_rt << endl;       
           }
@@ -163,7 +163,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         data_write = alu_result;
 
         
-        unint32_t mem_data;
+        uint32_t mem_data;
         // Memory
         // TODO: fill in the function argument
         if(control.mem_read == 1 || control.mem_write == 1)
@@ -190,11 +190,11 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             memory.access(alu_result, data_rs, data_rt, control.mem_read, control.mem_write); // regular load word
             if(control.mem_to_reg == 0b10) // lbu
             {
-              data_rs = data_rs & 0x000000ff
+              data_rs = data_rs & 0x000000ff;
             }
             if(control.mem_to_reg == 0b11) // lhu
             {
-              data_rs = data_rs & 0x0000ffff
+              data_rs = data_rs & 0x0000ffff;
             }
           }
           else // regular store word
