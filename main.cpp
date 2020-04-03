@@ -86,11 +86,11 @@ void print_help()
 
 int main(int argc, char *argv[]) {
 
-  /*Test*/
-  /* Registers tempR;
+  /*Test
+   Registers tempR;
   Memory tempM;
-  processor_main_loop(tempR, tempM, 0); */
-  
+  processor_main_loop(tempR, tempM, 0);*/
+
   static struct option long_options[] = {
       {"bmk", required_argument, 0, 'b'},
       {"processor", required_argument, 0, 'p'},
