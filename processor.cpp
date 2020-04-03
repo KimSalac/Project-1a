@@ -35,14 +35,14 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // fetch: good
         uint32_t instruction;
         memory.access(reg_file.pc, instruction, 0, 1, 0); 
-        cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
+        //cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // increment pc
         reg_file.pc += 4;
         
         // TODO: fill in the function argument
         // decode into contol signals
         control.decode(instruction);
-        cout<< "Instruction: " << instruction <<endl;
+        //cout<< "Instruction: " << instruction <<endl;
         //control.print(); // used for autograding 
         
         // TODO: fill in the function argument
@@ -52,13 +52,13 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         uint32_t rs_b = instruction << 6; //get rid of opcode
         rs_b = rs_b >> 27; //get rs
         int32_t rs_num = (int32_t) rs_b; //convert rs to int
-        cout<< "RS_num: " << rs_num <<endl; // prints rs value
+        //cout<< "RS_num: " << rs_num <<endl; // prints rs value
         
         /****get rt: good****/
         uint32_t rt_b = instruction << 11; //get rid of opcode and rs
         rt_b = rt_b >>27; //get rt
         int rt_num = (int32_t) rt_b; //convert rt to int
-        cout<<"Rt_num: "<<rt_num<<endl; // prints rt value
+        //cout<<"Rt_num: "<<rt_num<<endl; // prints rt value
 
         uint32_t data_rs; //variable for data of rs
         uint32_t data_rt; //varaible for data of rt
@@ -69,26 +69,26 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
         /****get opcode & funct: good ****/
         uint32_t op = instruction >> 26; // gets op
-        cout << "op: "<< op <<endl; //prints opcode
+        //cout << "op: "<< op <<endl; //prints opcode
         uint32_t funct = instruction << 26; // gets funct (see next too)
         funct = funct >>26;
-        cout<<"funct: "<<funct<<endl; //prints funct
+        //cout<<"funct: "<<funct<<endl; //prints funct
 
         if (op == 0){ //if r-type
             uint32_t rd_b = instruction << 16; //get rid of op, rs, rt
             rd_b = rd_b >> 27; // isolate rd
             rd_num = (int32_t) rd_b; //convert rd to int
-            cout<< "Rd_num: " << rd_num <<endl; //prints out rd
+            //cout<< "Rd_num: " << rd_num <<endl; //prints out rd
 
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 0, data_write); // gets rs, rt values
-            cout<<"rs_data: "<< data_rs <<endl;
-            cout<<"rt_data: "<< data_rt <<endl;
+            //cout<<"rs_data: "<< data_rs <<endl;
+            //cout<<"rt_data: "<< data_rt <<endl;
 
             if(funct == 2 || funct == 0) // checks to see if it's either shifts
             {
               uint32_t shamt = rd_b << 5;
               shamt = shamt >> 27; //isolate shamt
-              cout<< "shamt: " << shamt <<endl; //prints out shamt
+              //cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
             else if(funct == 8) // checks to see if it's jumpReg
             {
@@ -96,12 +96,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             }
           
         }
-        else{ //if I type - NOT COVER BEQ, LUI, STORES
+        else{ //if I type 
 
           data_i = instruction << 16; //gets immediate vales
           data_i = data_i >> 16;
 
-          if(op == 0b001100 || op == 0b001101) //logic operations
+          if(op == 0b001100 || op == 0b001101) //logic operations - andi ori 
           {
             reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
             data_i = data_i & 0x0000ffff; // zero extends first 16 bits
@@ -113,7 +113,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           }
           else if(op == 0b101000 || op == 0b101001 || op == 0b101011) // sb, sh, sw
           {
-            reg_file.access(rs_num, rt_num, data_rs, data_rt, 0, 0, data_write);
+            reg_file.access(rs_num, rt_num, data_rs, data_rt, 0, 0, data_write); //acess reg_file to get the data of rt
             if(control.store_reg == 0b01) // sb
             {
               data_rt = data_rt & 0x000000ff; // only takes lower 8 bits
@@ -122,22 +122,22 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             {
               data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
             }  
-            cout << "rt_data for stores: " << data_rt << endl;       
+           // cout << "rt_data for stores: " << data_rt << endl;       
           }
           else // rest of regular arithmetic and and loads
           {
             reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
           }
           
-          cout<< "data_i: " << data_i <<endl; //prints immediate value 
-          cout<< "rs_data: "<< data_rs <<endl;
+         // cout<< "data_i: " << data_i <<endl; //prints immediate value 
+          //cout<< "rs_data: "<< data_rs <<endl;
           //cout<<"rt_data: "<<data_rt<<endl;
         }
       
         // TODO: fill in the function argument
         // Execution 
         alu.generate_control_inputs(control.ALU_op, funct, op);
-        alu.print();
+        //alu.print();
 
         uint32_t alu_zero;
         uint32_t alu_result;
@@ -153,13 +153,13 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             alu_result = alu.execute(data_rs, data_rt, alu_zero);
           }
         }
-        else
+        else //if itype
         {
           alu_result = alu.execute(data_rs, data_i, alu_zero);
         }
 
-        int32_t r = (int32_t) alu_result;
-        cout<< "alu result: " << r << endl;
+        //int32_t r = (int32_t) alu_result;
+        //cout<< "alu result: " << r << endl;
         data_write = alu_result;
 
         
@@ -178,10 +178,10 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
               memory.access(alu_result, data_rs, data_rs, control.mem_read, control.mem_write); // write modified value to memory
             }
             if(control.store_reg == 0) // sh
-            {
+            { 
               memory.access(alu_result, data_rs, data_rt, 1, 0); // take value from memory
-              data_rs = data_rs & 0xffff0000; // get rid of rightmost 8 bits
-              data_rs = data_rs & data_rt; // replace rightmost 8 bits with rt
+              data_rs = data_rs & 0xffff0000; // get rid of rightmost 16 bits
+              data_rs = data_rs & data_rt; // replace rightmost 16 bits with rt
               memory.access(alu_result, data_rs, data_rs, control.mem_read, control.mem_write); // write modified value to memory
             }
           }
@@ -210,12 +210,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         {
           if(control.reg_dest == 0) // write to rt
           { //write to rt
-            cout<<"write to rt"<<endl;
+            //cout<<"write to rt"<<endl;
             reg_file.access(rs_num, 0, data_rs, data_rs, rt_num, 1, data_write);
           }
           else if(control.reg_dest == 1) //write to rd
           { 
-            cout<< "write to rd" <<endl;
+            //cout<< "write to rd" <<endl;
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
           }
         }
