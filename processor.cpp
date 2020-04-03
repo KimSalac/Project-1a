@@ -233,7 +233,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
     }
 
-    //cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
+    cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
     
     /*Temporary Tests for control signals
     
