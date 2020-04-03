@@ -71,6 +71,7 @@ struct control_t {
 	  else
 	    {
 	      reg_dest = 1;
+		  reg_write = 1;
 	    }
 	  ALU_op = 0b10;
 	}
