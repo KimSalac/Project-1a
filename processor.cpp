@@ -90,7 +90,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             {
               uint32_t sh =  instruction << 21;
               shamt = sh >> 27; //isolate shamt
-              cout<< "shamt: " << shamt <<endl; //prints out shamt
+              //cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
           
         }

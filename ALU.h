@@ -120,16 +120,16 @@ class ALU {
             }
             else if(ALU_control_inputs == 12){ // srl
                 uint32_t temp = pow(2, operand_2);
-                cout << "temp: " << temp << endl;
+               // cout << "temp: " << temp << endl;
                 uint32_t result = operand_1/temp;
-                cout << "result: " << result << endl;
+               // cout << "result: " << result << endl;
                 return result;
             }
             else if(ALU_control_inputs == 4){ // sll
                 uint32_t temp = pow(2, operand_2);
-                cout << "temp: " << temp << endl;
+              //  cout << "temp: " << temp << endl;
                 uint32_t result = operand_1*temp;
-                cout << "result: " << result << endl;
+              //  cout << "result: " << result << endl;
                 return result;
             }
             else if(ALU_control_inputs == 3){ // nor
