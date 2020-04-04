@@ -117,7 +117,8 @@ class ALU {
                 }
             }
             else if(ALU_control_inputs == 12){ // srl
-                return operand_2 >> (int) operand_1;
+                int shift = operand_2;
+                return operand_1 >> shift;
             }
             else if(ALU_control_inputs == 4){ // sll
                 return operand_1 << (int) operand_2;
