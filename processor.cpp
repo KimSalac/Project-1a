@@ -217,7 +217,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           {
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write);
           }
-          memory.print(data_rs, data_i);
+          memory.print(alu_result, 10);
         }
 
         
