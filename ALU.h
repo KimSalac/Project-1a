@@ -92,7 +92,8 @@ class ALU {
             }
             else if(ALU_control_inputs == 6){ //sub op
                 output =  operand_1 - operand_2;
-                if(output == 0)
+                int32_t compare = (int32_t) operand_1 - (int32_t) operand_2;
+                if(compare == 0)
                 {
                     ALU_zero = 1;
                 }

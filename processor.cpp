@@ -76,7 +76,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         funct = funct >>26;
         //cout<<"funct: "<<funct<<endl; //prints funct
 
-        if (control.ALU_src == 0){ //if r-type
+        if (op == 0){ //if r-type
             uint32_t rd_b = instruction << 16; //get rid of op, rs, rt
             rd_b = rd_b >> 27; // isolate rd
             rd_num = (int32_t) rd_b; //convert rd to int
@@ -94,7 +94,8 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             }
           
         }
-        else{ //if I type
+        else
+        { //if I type
           int16_t i = instruction & 0xFFFF;
           //i = instruction >> 8;
            //cout<<"i: "<<i<<endl;
@@ -129,12 +130,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           }
           else // rest of regular arithmetic and loads
           {
-            reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
+            reg_file.access(rs_num, rt_num, data_rs, data_rt, rt_num, 0, data_write);
           }
           
           //cout<< "data_i: " << data_i <<endl; //prints immediate value 
-          //cout<< "rs_data: "<< data_rs <<endl;
-          //cout<<"rt_data: "<<data_rt<<endl;
+         // cout<< "rs_data: "<< data_rs <<endl;
+         // cout<<"rt_data: "<< (int32_t) data_rt <<endl;
         }
       
         // TODO: fill in the function argument
@@ -161,6 +162,10 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           if(!control.branch)
           {
             alu_result = alu.execute(data_rs, data_i, alu_zero);
+          }
+          else
+          {
+            alu_result = alu.execute(data_rs, data_rt, alu_zero);
           }
         }
 
@@ -236,9 +241,9 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: Update PC
         if(control.branch == 1) // update proper branch address
         {
-          if(control.beq & alu_zero) // beq
+          if(control.beq == alu_zero) // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
           {
-            reg_file.pc = reg_file.pc + data_i;
+            reg_file.pc = reg_file.pc + (data_i << 2);
           }
         }
         else if(funct == 8) // checks to see if it's jumpReg

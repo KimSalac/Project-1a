@@ -95,11 +95,11 @@ struct control_t {
 
     if(beqne) //good: sets signals for all branch  instructions
 	{
-		if((instruction >> 26) == 0b000100)
+		if((instruction >> 26) == 0b000100) // beq
 		{
 			beq = 1;
 		}
-		else
+		else // bne
 		{
 			beq = 0;
 		}

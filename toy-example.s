@@ -11,6 +11,11 @@ __start:
    nor $10, $2, $7
    and $4, $1, $2
    or $3, $2, $1
-   sll $9, $7, 2 
+   sll $9, $7, 2
+   bne $2, $1, __back
+   add $5, $1, $2
+   addi $1, $1, 1
+__back:
+   sub $4, $4, 1
 	.end	__start
 	.size	__start, .-__start
