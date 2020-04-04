@@ -11,9 +11,9 @@ class ALU {
     public:
         // TODO:
         // Generate the control inputs for the ALU
-        void generate_control_inputs(int ALU_op, int funct, int opcode) {        
+        void generate_control_inputs(int ALU_op, int funct, int opcode) { 
             if (opcode == 0){ // if rtype
-            //std::cout<<"funct: "<<std::bitset<32>funct<<std::endl;
+            //std::cout<<"funct: "<<funct<<std::endl;
                 if (funct ==  0b100000 || funct == 0b100001){ //rtype Add
                     ALU_control_inputs = 2;//0010;
                     //cout<< "rtype add" << endl;
@@ -110,7 +110,10 @@ class ALU {
             }
             else if(ALU_control_inputs == 7){ //set less than op
                 //if a is less than b, output 1 else output 0
+                //cout<<"op1: "<<(int32_t) operand_1<<endl;
+                //cout<<"op2: "<<(int32_t) operand_2<<endl;
                 int32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
+                //cout<<"n: "<<n<<endl;
                 if (n < 0){
                     return 1;
                 }
@@ -140,9 +143,9 @@ class ALU {
         return 0;
         }
         
-        /*void print(){ //print method to make sure the control singals are correct
+        void print(){ //print method to make sure the control singals are correct
             std::cout<<"alu control: " << ALU_control_inputs << std::endl;
-        }*/
+        }
             
 };
 #endif
