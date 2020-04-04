@@ -187,6 +187,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           {
             if(control.store_reg == 1) // sb
             {
+              cout << "was sh" << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
               data_write = data_write & 0xffffff00; // get rid of rightmost 8 bits
               data_write = data_write & data_rt; // replace rightmost 8 bits with rt
@@ -194,6 +195,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             }
             if(control.store_reg == 0) // sh
             {
+              cout << "was sh" << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
               data_write = data_write & data_rt; // replace rightmost 16 bits with rt
@@ -203,21 +205,25 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           else if(control.mem_to_reg == 1) //loads
           {
             //cout << "got here" << endl;
+            cout << "passed into lw" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write); // regular load word
             if(control.load_reg == 0b10) // lbu
             {
+              cout << "was lbu" << endl;
               data_write = data_write & 0x000000ff;
             }
             if(control.load_reg == 0b11) // lhu
             {
+              cout << "was lhu" << endl;
               data_write = data_write & 0x0000ffff;
             }
           }
           else // regular store word
           {
+            cout << "was sw" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write);
           }
-          memory.print(alu_result, 10);
+          //memory.print(alu_result, 10);
         }
 
         
