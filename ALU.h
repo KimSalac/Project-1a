@@ -75,7 +75,7 @@ class ALU {
                 else if(opcode == 13){//itype ori
                     ALU_control_inputs = 1;
                 }
-                else{ /*if(opcode != 15)*/ //itype set less than
+                else{ //itype set less than
                     ALU_control_inputs = 7;
                 }
             }
