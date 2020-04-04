@@ -375,13 +375,15 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         }
         else{ //if I type 
 
-          data_i = instruction << 16; //gets immediate vales
-          data_i = data_i >> 16;
+          int16_t i = instruction & 0xFFFF;
+          data_i = (int32_t) i;
            next_state.idex.imm = data_i; //put in the imm for next state
 
           if(op == 0b001100 || op == 0b001101) //logic operations - andi ori 
           {
             reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
+            data_i = instruction << 16; //gets immediate vales
+            data_i = data_i >> 16;
             data_i = data_i & 0x0000ffff; // zero extends first 16 bits
             next_state.idex.imm = data_i; //put in the imm for next state
           }
