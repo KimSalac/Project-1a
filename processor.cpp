@@ -7,6 +7,7 @@
 #include "reg_file.h"
 #include "ALU.h"
 #include "control.h"
+#include <bitset>
 
 using namespace std;
 
@@ -53,7 +54,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         /****get rs: good****/
         uint32_t rs_b = instruction << 6; //get rid of opcode
         rs_b = rs_b >> 27; //get rs
-        int32_t rs_num = (int32_t) rs_b; //convert rs to int
+        int rs_num = (int32_t) rs_b; //convert rs to int
         //cout<< "RS_num: " << rs_num <<endl; // prints rs value
         
         /****get rt: good****/
@@ -67,7 +68,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         uint32_t data_i = 0; //variable for data of imm
         uint32_t data_write = 0; //varable for data to be written
         int rd_num = 0; //var for rd reg #
-        int shamt = 0; //var for shamt
+        uint32_t shamt = 0; //var for shamt
 
         /****get opcode & funct: good ****/
         uint32_t op = instruction >> 26; // gets op
@@ -88,8 +89,8 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
             if(funct == 2 || funct == 0) // checks to see if it's either shifts
             {
-              uint32_t sh =  instruction << 21;
-              shamt = sh >> 27; //isolate shamt
+              shamt =  instruction << 21;
+              shamt = shamt >> 27; //isolate shamt
               //cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
           
@@ -114,6 +115,8 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           {
             data_i = data_i << 16;
             data_i = data_i & 0xffff0000;
+            std::bitset<32>  x(data_i);
+            //cout << "data_i: " << x << endl;
           }
           else if(op == 0b101000 || op == 0b101001 || op == 0b101011) // sb, sh, sw
           {
@@ -165,11 +168,13 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           }
           else
           {
+            //cout << "got here" << endl;
             alu_result = alu.execute(data_rs, data_rt, alu_zero);
           }
+          
         }
 
-        int32_t r = (int32_t) alu_result;
+        //int32_t r = (int32_t) alu_result;
         //cout<< "alu result: " << r << endl;
         data_write = alu_result;
 
@@ -197,6 +202,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           }
           else if(control.mem_to_reg == 1) //loads
           {
+            //cout << "got here" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write); // regular load word
             if(control.load_reg == 0b10) // lbu
             {
