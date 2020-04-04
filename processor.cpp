@@ -32,7 +32,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
     
-    while (reg_file.pc != end_pc) {
+    while (reg_file.pc != end_pc && num_cycles < 10) {
 
         // fetch: good
         uint32_t instruction;
@@ -40,7 +40,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         //cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // increment pc
         reg_file.pc += 4;
-        
+        //cout << "\nPC2: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // TODO: fill in the function argument
         // decode into contol signals
         control.decode(instruction);
@@ -90,7 +90,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             {
               uint32_t sh =  instruction << 21;
               shamt = sh >> 27; //isolate shamt
-              cout<< "shamt: " << shamt <<endl; //prints out shamt
+              //cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
           
         }
@@ -161,10 +161,11 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           if(!control.branch)
           {
             alu_result = alu.execute(data_rs, data_i, alu_zero);
+            //cout<<"alu res: "<<alu_result<<endl;
           }
         }
 
-        int32_t r = (int32_t) alu_result;
+        //int32_t r = (int32_t) alu_result;
         //cout<< "alu result: " << r << endl;
         data_write = alu_result;
 
@@ -236,13 +237,15 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: Update PC
         if(control.branch == 1) // update proper branch address
         {
+           //cout<<"jump branch"<<endl;
           if(control.beq & alu_zero) // beq
           {
             reg_file.pc = reg_file.pc + data_i;
           }
         }
-        else if(funct == 8) // checks to see if it's jumpReg
+        else if(op == 0 & funct == 8) // checks to see if it's jumpReg
         {
+          //cout<<"jump reg"<<endl;
           reg_file.pc = data_rs; // PC=R[rs]
         }
 
@@ -251,6 +254,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
         num_cycles++;
         num_instrs++; 
+        //cout << "\nPC-END: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         //cout<<"# in: "<< num_instrs<<endl;
 
     }
