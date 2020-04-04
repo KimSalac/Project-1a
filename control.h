@@ -68,6 +68,8 @@ struct control_t {
 	    {
 	      reg_dest = 0;
 	      jump = 1;
+		  reg_write = 0;
+		  ALU_op = 0b00;
 	    }
 	  else
 	    {
@@ -75,7 +77,6 @@ struct control_t {
 		  reg_write = 1;
 	    }
 	  ALU_op = 0b10;
-	  reg_write = 1;
 	}
 
     /*if(jumps) //sets signals for all jump  instructions
