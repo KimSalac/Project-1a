@@ -190,6 +190,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             if(control.store_reg == 1) // sb
             {
               //cout << "was sb" << endl;
+              cout << "data_rt: " << data_rt << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
               cout << "Value from memory: " << (int32_t) data_write << endl;
               data_write = data_write & 0xffffff00; // get rid of rightmost 8 bits
@@ -202,6 +203,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             if(control.store_reg == 0) // sh
             {
               //cout << "was sh" << endl;
+              cout << "data_rt: " << data_rt << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
               cout << "Value from memory: " << (int32_t) data_write << endl;
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
