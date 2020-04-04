@@ -117,10 +117,10 @@ class ALU {
                 }
             }
             else if(ALU_control_inputs == 12){ // srl
-                return operand_2 >> operand_1;
+                return operand_2 >> (int) operand_1;
             }
             else if(ALU_control_inputs == 4){ // sll
-                return operand_1 << operand_2;
+                return operand_1 << (int) operand_2;
             }
             else if(ALU_control_inputs == 3){ // nor
                 uint32_t r = (operand_1) | (operand_2);
