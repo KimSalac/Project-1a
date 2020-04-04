@@ -104,6 +104,8 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
           if(control.sign_zero == 1) //logic operations
           {
+            data_i = instruction << 16; //gets immediate vales - zero extended
+            data_i = data_i >> 16;
             reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, data_write);
             data_i = data_i & 0x0000ffff; // zero extends first 16 bits
           }
