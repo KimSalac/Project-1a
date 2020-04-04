@@ -9,7 +9,7 @@ class ALU {
     private:
         int ALU_control_inputs;
     public:
-        // TODO:
+        // TODO:                                                                        
         // Generate the control inputs for the ALU
         void generate_control_inputs(int ALU_op, int funct, int opcode) {        
             if (opcode == 0){ // if rtype
@@ -75,7 +75,7 @@ class ALU {
                 else if(opcode == 13){//itype ori
                     ALU_control_inputs = 1;
                 }
-                else{ /*if(opcode != 15)*/ //itype set less than
+                else{ //itype set less than
                     ALU_control_inputs = 7;
                 }
             }
@@ -111,7 +111,7 @@ class ALU {
             }
             else if(ALU_control_inputs == 7){ //set less than op
                 //if a is less than b, output 1 else output 0
-                uint32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
+                int32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
                 if (n < 0){
                     return 1;
                 }
