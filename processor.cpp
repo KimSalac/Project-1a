@@ -144,7 +144,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         { 
           if(funct == 2 || funct == 0) // if shift
           {
-            alu_result = alu.execute(data_rs, shamt, alu_zero);
+            alu_result = alu.execute(data_rt, shamt, alu_zero);
           }
           else // if regular r-type
           {
