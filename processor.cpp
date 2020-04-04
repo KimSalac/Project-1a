@@ -95,9 +95,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           
         }
         else{ //if I type
-
-          data_i = instruction << 16; //gets immediate vales
-          data_i = data_i >> 16;
+          int16_t i = instruction & 0xFFFF;
+          //i = instruction >> 8;
+           //cout<<"i: "<<i<<endl;
+          //data_i = instruction << 16; //gets immediate vales
+          data_i = (int32_t) i;
+          //cout<<"data_i: "<<data_i<<endl;
 
           if(control.sign_zero == 1) //logic operations
           {
