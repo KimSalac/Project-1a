@@ -165,6 +165,10 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           if(!control.branch)
           {
             alu_result = alu.execute(data_rs, data_i, alu_zero);
+            if(control.mem_read == 1 || control.mem_write == 1)
+            {
+              memory.print(data_rs, (data_i<<2));
+            }
           }
           else
           {
