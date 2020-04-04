@@ -88,8 +88,8 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
             if(funct == 2 || funct == 0) // checks to see if it's either shifts
             {
-              uint32_t shamt = rd_b << 5;
-              shamt = shamt >> 27; //isolate shamt
+              uint32_t sh = rd_b << 5;
+              shamt = sh >> 27; //isolate shamt
               //cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
           
@@ -149,7 +149,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         { 
           if(funct == 2 || funct == 0) // if shift
           {
-            alu_result = alu.execute(data_rs, shamt, alu_zero);
+            alu_result = alu.execute(data_rt, shamt, alu_zero);
           }
           else // if regular r-type
           {
@@ -243,7 +243,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         }
         else if(funct == 8) // checks to see if it's jumpReg
         {
-          reg_file.pc = reg_file.pc - 4 + data_rs; // PC=R[rs]
+          reg_file.pc = data_rs; // PC=R[rs]
         }
 
         cout << "CYCLE" << num_cycles << "\n";
