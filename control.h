@@ -112,6 +112,7 @@ struct control_t {
 	{
 		mem_to_reg = 1;
 		mem_read = 1;
+		ALU_op = 0b00;
 		if((instruction >> 26) == 0b100100) // lbu
 		{
 			load_reg = 0b10;
@@ -124,6 +125,7 @@ struct control_t {
 		{
 			mem_to_reg = 0;
 			mem_read = 0;
+			ALU_op = 0b11;
 		}
 		if((instruction >> 26) == 0b100011) // lw
 		{
@@ -132,7 +134,6 @@ struct control_t {
 
 	  ALU_src = 1;
 	  reg_write = 1;
-	  ALU_op = 0b00;
 	}
 
     if(store) //sets signals for all store  instructions

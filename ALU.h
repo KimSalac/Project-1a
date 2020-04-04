@@ -111,7 +111,7 @@ class ALU {
             }
             else if(ALU_control_inputs == 7){ //set less than op
                 //if a is less than b, output 1 else output 0
-                int32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
+                uint32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
                 if (n < 0){
                     return 1;
                 }
