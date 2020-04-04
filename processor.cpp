@@ -88,9 +88,9 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
             if(funct == 2 || funct == 0) // checks to see if it's either shifts
             {
-              uint32_t sh = rd_b << 5;
+              uint32_t sh =  instruction << 21;
               shamt = sh >> 27; //isolate shamt
-              //cout<< "shamt: " << shamt <<endl; //prints out shamt
+              cout<< "shamt: " << shamt <<endl; //prints out shamt
             }
           
         }
