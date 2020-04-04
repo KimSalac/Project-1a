@@ -187,11 +187,15 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           {
             if(control.store_reg == 1) // sb
             {
-              //cout << "was sh" << endl;
+              //cout << "was sb" << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
+              //cout << "Value from memory: " << (int32_t) data_write << endl;
               data_write = data_write & 0xffffff00; // get rid of rightmost 8 bits
+              //cout << "Value zeroed: " << (int32_t) data_write << endl;
               data_write = data_write & data_rt; // replace rightmost 8 bits with rt
-              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
+              //cout << "Value modified: " << (int32_t) data_write << endl;
+
+              memory.access(alu_result, data_rt, data_write, control.mem_read, control.mem_write); // write modified value to memory
             }
             if(control.store_reg == 0) // sh
             {
@@ -199,7 +203,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
               data_write = data_write & data_rt; // replace rightmost 16 bits with rt
-              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
+              memory.access(alu_result, data_rt, data_write, control.mem_read, control.mem_write); // write modified value to memory
             }
           }
           else if(control.mem_to_reg == 1) //loads
