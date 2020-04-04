@@ -24,11 +24,11 @@ class ALU {
                 else if (funct ==  0b100100)
                 { //rtype and
                     ALU_control_inputs = 0000;
-                    //cout<< "rtype add" << endl;
+                   // cout<< "rtype add" << endl;
                 }else if (funct ==  0b100101){
                      //rtype or
                     ALU_control_inputs = 0001;
-                    //cout<< "rtype add" << endl;
+                  //  cout<< "rtype add" << endl;
                 }
                 else if (funct ==  0b101010)
                 { //rtype set on less than
@@ -71,7 +71,7 @@ class ALU {
                     ALU_control_inputs = 2;
                     //std::cout<<"itype add"<<std::endl;
                 }
-                else if(opcode == 13){//itype ori and orriu
+                else if(opcode == 13){//itype ori
                     ALU_control_inputs = 1;
                 }
                 else{ //itype set less than
@@ -83,7 +83,7 @@ class ALU {
         // TODO:
         // execute ALU operations, generate result, and set the zero control signal if necessary
         uint32_t execute(uint32_t operand_1, uint32_t operand_2, uint32_t &ALU_zero) { //havent set up alu_zero
-            uint32_t output;
+            uint32_t output = 0;
             if(ALU_control_inputs == 2){ //add op
             //std::cout<<"o: "<<(int32_t) operand_1<<std::endl;
             //std::cout<<"o: "<<(int32_t) operand_2<<std::endl;
@@ -124,14 +124,16 @@ class ALU {
                 return operand_1 << operand_2;
             }
             else if(ALU_control_inputs == 3){ // nor
-                return !(operand_1 | operand_2);
+                uint32_t r = (operand_1) | (operand_2);
+                uint32_t n = ~r;
+                return output = (n);
             }
         return 0;
         }
         
-        void print(){ //print method to make sure the control singals are correct
+        /*void print(){ //print method to make sure the control singals are correct
             std::cout<<"alu control: " << ALU_control_inputs << std::endl;
-        }
+        }*/
             
 };
 #endif

@@ -11,14 +11,15 @@ struct control_t {
     bool jump;               // 1 if jummp Register
     bool branch;             // 1 if branch
     bool mem_read;           // 1 if memory needs to be read
-    unsigned mem_to_reg : 2; // 1 if memory needs to written to reg
+    bool mem_to_reg; // 1 if memory needs to written to reg
     unsigned ALU_op : 2;     // 10 for R-type, 00 for LW/SW, 01 for BEQ/BNE, 11 for others
     bool mem_write;          // 1 if needs to be written to memory
     bool ALU_src;            // 0 if second operand is from reg_file, 1 if imm
     bool reg_write;          // 1 if need to write back to reg file
 	unsigned store_reg : 2;				// dealing specifically with sh and asb
+	unsigned load_reg: 2; // deals with lbu and lhu
 	bool sign_zero;			// sign-extended or zero-extended
-	bool bne;
+	bool beq;
     
     void print() {      // Prints the generated contol signals
         cout << "REG_DEST: " << reg_dest << "\n";
@@ -30,9 +31,9 @@ struct control_t {
         cout << "MEM_WRITE: " << mem_write << "\n";
         cout << "ALU_SRC: " << ALU_src << "\n";
         cout << "REG_WRITE: " << reg_write << "\n";
-		cout << "STORE_REG: " << store_reg << "\n";
-		cout << "SIGN_ZERO: " << sign_zero << "\n";
-		cout << "BNE: " << bne << "\n";
+		//cout << "STORE_REG: " << store_reg << "\n";
+		//cout << "SIGN_ZERO: " << sign_zero << "\n";
+		//cout << "BEQ: " << beq << "\n";
     }
     // TODO:
     // Decode instructions into control signals
@@ -44,14 +45,15 @@ struct control_t {
     jump = 0;
     branch = 0;
     mem_read = 0;
-    mem_to_reg = 0b00;
+    mem_to_reg = 0;
     ALU_op = 0b00;
     mem_write = 0;
     ALU_src = 0;
     reg_write = 0;
 	store_reg = 0b00;
+	load_reg = 0b00;
 	sign_zero = 0;
-	bne = 0; //1 if bne, 0 if beq
+	beq = 0; //1 if beq, 0 if bne
 
       bool rType = !(instruction >> 26);
       bool load = ((instruction >> 26) == 0b100100) || ((instruction >> 26) == 0b100101) || ((instruction >> 26) == 0b001111) || ((instruction >> 26) == 0b100011) || ((instruction >> 26) == 0b110000);
@@ -66,6 +68,8 @@ struct control_t {
 	    {
 	      reg_dest = 0;
 	      jump = 1;
+		  reg_write = 0;
+		  ALU_op = 0b00;
 	    }
 	  else
 	    {
@@ -73,7 +77,6 @@ struct control_t {
 		  reg_write = 1;
 	    }
 	  ALU_op = 0b10;
-	  reg_write = 1;
 	}
 
     /*if(jumps) //sets signals for all jump  instructions
@@ -94,11 +97,11 @@ struct control_t {
 	{
 		if((instruction >> 26) == 0b000100)
 		{
-			bne = 0;
+			beq = 1;
 		}
 		else
 		{
-			bne = 1;
+			beq = 0;
 		}
 
 	  branch = 1;
@@ -107,25 +110,22 @@ struct control_t {
 
     if(load) //good: sets signals for all loads  instructions
 	{
+		mem_to_reg = 1;
 		if((instruction >> 26) == 0b100100) // lbu
 		{
-			mem_to_reg = 0b10;
+			load_reg = 0b10;
 		}
 		if((instruction >> 26) == 0b100101) // lhu
 		{
-			mem_to_reg = 0b11;
+			load_reg = 0b11;
 		}
 		if((instruction >> 26) == 0b001111) // lui
 		{
-			mem_to_reg = 0b00;
+			mem_to_reg = 0;
 		}
 		if((instruction >> 26) == 0b100011) // lw
 		{
-			mem_to_reg = 0b01;
-		}
-		if((instruction >> 26) == 0b110000) //ll
-		{
-			mem_to_reg = 0b01;
+			load_reg = 0b00;
 		}
 
 	  mem_read = 1;
