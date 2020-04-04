@@ -32,12 +32,12 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
     
-    while (reg_file.pc != end_pc && num_cycles < 10) {
+    while (reg_file.pc != end_pc) {
 
         // fetch: good
         uint32_t instruction;
         memory.access(reg_file.pc, instruction, 0, 1, 0); 
-        //cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
+        cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // increment pc
         reg_file.pc += 4;
         //cout << "\nPC2: 0x" << std::hex << reg_file.pc << std::dec << "\n";
