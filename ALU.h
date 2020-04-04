@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
+#include <math.h>
 using namespace std;
 class ALU {
     private:
@@ -118,11 +119,18 @@ class ALU {
                 }
             }
             else if(ALU_control_inputs == 12){ // srl
-                int shift = operand_2;
-                return operand_1 >> shift;
+                uint32_t temp = pow(2, operand_2);
+                cout << "temp: " << temp << endl;
+                uint32_t result = operand_1/temp;
+                cout << "result: " << result << endl;
+                return result;
             }
             else if(ALU_control_inputs == 4){ // sll
-                return operand_1 << (int) operand_2;
+                uint32_t temp = pow(2, operand_2);
+                cout << "temp: " << temp << endl;
+                uint32_t result = operand_1*temp;
+                cout << "result: " << result << endl;
+                return result;
             }
             else if(ALU_control_inputs == 3){ // nor
                 uint32_t r = (operand_1) | (operand_2);
