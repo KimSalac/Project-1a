@@ -245,11 +245,11 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
         num_cycles++;
         num_instrs++; 
-        cout<<"# in: "<< num_instrs<<endl;
+        //cout<<"# in: "<< num_instrs<<endl;
 
     }
 
-    //cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
+    cout << "CPI = " << (double)num_cycles/(double)num_instrs << "\n";
     
     /*Temporary Tests for control signals
     

@@ -82,7 +82,7 @@ class ALU {
         // TODO:
         // execute ALU operations, generate result, and set the zero control signal if necessary
         uint32_t execute(uint32_t operand_1, uint32_t operand_2, uint32_t &ALU_zero) { //havent set up alu_zero
-            uint32_t output;
+            uint32_t output = 0;
             if(ALU_control_inputs == 2){ //add op
             //std::cout<<"o: "<<(int32_t) operand_1<<std::endl;
             //std::cout<<"o: "<<(int32_t) operand_2<<std::endl;
