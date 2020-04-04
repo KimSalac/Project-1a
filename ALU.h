@@ -24,11 +24,11 @@ class ALU {
                 else if (funct ==  0b100100)
                 { //rtype and
                     ALU_control_inputs = 0000;
-                    cout<< "rtype add" << endl;
+                   // cout<< "rtype add" << endl;
                 }else if (funct ==  0b100101){
                      //rtype or
                     ALU_control_inputs = 0001;
-                    cout<< "rtype add" << endl;
+                  //  cout<< "rtype add" << endl;
                 }
                 else if (funct ==  0b101010)
                 { //rtype set on less than
@@ -52,7 +52,7 @@ class ALU {
                 }
             }
             else{ //I type and j type
-            std::cout<<"opcode: "<<opcode<<std::endl;
+            //std::cout<<"opcode: "<<opcode<<std::endl;
                 if (ALU_op == 00){ //for loads and stores
                     ALU_control_inputs = 2;//0010;
                     //cout<< "load/store" << endl;
@@ -130,9 +130,9 @@ class ALU {
         return 0;
         }
         
-        void print(){ //print method to make sure the control singals are correct
+        /*void print(){ //print method to make sure the control singals are correct
             std::cout<<"alu control: " << ALU_control_inputs << std::endl;
-        }
+        }*/
             
 };
 #endif

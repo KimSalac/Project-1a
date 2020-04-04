@@ -134,7 +134,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: fill in the function argument
         // Execution 
         alu.generate_control_inputs(control.ALU_op, funct, op);
-        alu.print();
+        //alu.print();
 
         uint32_t alu_zero = 0;
         uint32_t alu_result = 0;
