@@ -25,6 +25,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
                         .ALU_src = 0,
                         .reg_write = 0,
                         .store_reg = 0,
+                        .load_reg = 0,
                         .sign_zero = 0,
                         .beq = 0};
     
@@ -184,14 +185,14 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
               memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
             }
           }
-          else if(control.mem_to_reg > 0) //loads
+          else if(control.mem_to_reg == 1) //loads
           {
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write); // regular load word
-            if(control.mem_to_reg == 0b10) // lbu
+            if(control.load_reg == 0b10) // lbu
             {
               data_write = data_write & 0x000000ff;
             }
-            if(control.mem_to_reg == 0b11) // lhu
+            if(control.load_reg == 0b11) // lhu
             {
               data_write = data_write & 0x0000ffff;
             }
