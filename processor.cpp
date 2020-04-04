@@ -238,7 +238,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         }
         else if(funct == 8) // checks to see if it's jumpReg
         {
-          reg_file.pc = reg_file.pc - 4 + data_rs; // PC=R[rs]
+          reg_file.pc = data_rs; // PC=R[rs]
         }
 
         cout << "CYCLE" << num_cycles << "\n";
