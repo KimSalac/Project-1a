@@ -246,7 +246,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             reg_file.pc = reg_file.pc + (data_i << 2);
           }
         }
-        else if(funct == 8) // checks to see if it's jumpReg
+        else if(op == 0 && funct == 8) // checks to see if it's jumpReg
         {
           reg_file.pc = data_rs; // PC=R[rs]
         }
