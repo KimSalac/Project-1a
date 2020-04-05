@@ -16,5 +16,9 @@ __start:
    andi $14, $2, 7
    ori $11, $6, 4
    lui $13, 15
+   addi $20, $0, 2989
+   addi $21, $0, 16384
+   sw $20, 4($0)
+   sb $2, 4($0)
 	.end	__start
 	.size	__start, .-__start

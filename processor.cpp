@@ -164,7 +164,14 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         {
           if(!control.branch)
           {
+            /*if(control.mem_write == 1 || control.mem_read == 1)
+            {
+              data_i = data_i << 2;
+            }*/
             alu_result = alu.execute(data_rs, data_i, alu_zero);
+            //cout << "data_rs: " << data_rs << endl;
+            //cout << "data_i: " << data_i << endl;
+            //cout << "alu_result: " << alu_result << endl;
           }
           else
           {
@@ -183,24 +190,36 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: fill in the function argument
         if(control.mem_read == 1 || control.mem_write == 1)
         {
-          if(control.store_reg > 2) //stores
+          if(control.mem_write == 1) //stores
           {
             if(control.store_reg == 1) // sb
             {
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
+              //cout << "value at memory before change: " << data_write << endl;
               data_write = data_write & 0xffffff00; // get rid of rightmost 8 bits
-              data_write = data_write & data_rt; // replace rightmost 8 bits with rt
-              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
+              //cout << "data_write after zeroing 8 bits: " << data_write << endl;
+              data_write = data_write | data_rt; // replace rightmost 8 bits with rt
+              //cout << "new value to store in memory: " << data_write << endl;
+              memory.access(alu_result, data_write, data_write, control.mem_read, control.mem_write); // write modified value to memory
             }
-            if(control.store_reg == 0) // sh
+            else if(control.store_reg == 0) // sh
             {
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
+              //cout << "value at memory before change: " << data_write << endl;
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
-              data_write = data_write & data_rt; // replace rightmost 16 bits with rt
-              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
+              //cout << "data_write after zeroing 8 bits: " << data_write << endl;
+              data_write = data_write | data_rt; // replace rightmost 16 bits with rt
+              //cout << "new value to store in memory: " << data_write << endl;
+              memory.access(alu_result, data_write, data_write, control.mem_read, control.mem_write); // write modified value to memory
             }
+            else
+            {
+              //cout << "data_rt: " << data_rt << endl;
+              memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write);
+            } 
+            //memory.print(alu_result/4, 1);
           }
-          else if(control.mem_to_reg == 1) //loads
+          else //loads
           {
             //cout << "got here" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write); // regular load word
@@ -212,10 +231,6 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
             {
               data_write = data_write & 0x0000ffff;
             }
-          }
-          else // regular store word
-          {
-            memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write);
           }
         }
 
