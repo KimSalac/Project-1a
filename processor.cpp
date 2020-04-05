@@ -120,16 +120,14 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
           }
           else if(op == 0b101000 || op == 0b101001 || op == 0b101011) // sb, sh, sw
           {
-            reg_file.access(rs_num, rt_num, data_rs, data_rt, rt_num, 0, data_write); //acess reg_file to get the data of rt
+            reg_file.access(rs_num, rt_num, data_rs, data_rt, 0, 0, data_write); //acess reg_file to get the data of rt
             if(control.store_reg == 0b01) // sb
             {
               data_rt = data_rt & 0x000000ff; // only takes lower 8 bits
-              //cout << "data_rt from sb" << data_rt << endl;
             }
             else if(control.store_reg == 0b00) // sh
             {
               data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
-              //cout << "data_rt from sb" << data_rt << endl;
             }  
             //cout << "rt_data for stores: " << data_rt << endl;       
           }
@@ -185,56 +183,40 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // TODO: fill in the function argument
         if(control.mem_read == 1 || control.mem_write == 1)
         {
-          if(control.store_reg < 2) //stores
+          if(control.store_reg > 2) //stores
           {
             if(control.store_reg == 1) // sb
             {
-              //cout << "was sb" << endl;
-              cout << "data_rt: " << data_rt << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
-              cout << "Value from memory: " << (int32_t) data_write << endl;
               data_write = data_write & 0xffffff00; // get rid of rightmost 8 bits
-              cout << "Value zeroed: " << (int32_t) data_write << endl;
-              data_write = data_write | data_rt; // replace rightmost 8 bits with rt
-              cout << "Value modified: " << (int32_t) data_write << endl;
-
-              memory.access(alu_result, data_rt, data_write, control.mem_read, control.mem_write); // write modified value to memory
+              data_write = data_write & data_rt; // replace rightmost 8 bits with rt
+              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
             }
             if(control.store_reg == 0) // sh
             {
-              //cout << "was sh" << endl;
-              cout << "data_rt: " << data_rt << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
-              cout << "Value from memory: " << (int32_t) data_write << endl;
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
-              cout << "Value zeroed: " << (int32_t) data_write << endl;
-              data_write = data_write | data_rt; // replace rightmost 16 bits with rt
-              cout << "Value modified: " << (int32_t) data_write << endl;
-              memory.access(alu_result, data_rt, data_write, control.mem_read, control.mem_write); // write modified value to memory
+              data_write = data_write & data_rt; // replace rightmost 16 bits with rt
+              memory.access(alu_result, data_write, data_rs, control.mem_read, control.mem_write); // write modified value to memory
             }
           }
           else if(control.mem_to_reg == 1) //loads
           {
             //cout << "got here" << endl;
-            //cout << "passed into lw" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write); // regular load word
             if(control.load_reg == 0b10) // lbu
             {
-             // cout << "was lbu" << endl;
               data_write = data_write & 0x000000ff;
             }
             if(control.load_reg == 0b11) // lhu
             {
-              //cout << "was lhu" << endl;
               data_write = data_write & 0x0000ffff;
             }
           }
           else // regular store word
           {
-            //cout << "was sw" << endl;
             memory.access(alu_result, data_write, data_rt, control.mem_read, control.mem_write);
           }
-          //memory.print(alu_result, 10);
         }
 
         
