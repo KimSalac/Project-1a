@@ -61,6 +61,9 @@ struct EXMEM {
     int rt; //rt register
     uint32_t data_rs; //reg 1 data 
     uint32_t data_rt; // reg 2 data
+    uint32_t op; //for alu execute
+    uint32_t funct; //for update
+    uint32_t imm; //imm for reg write
     int write_reg; //for reg write
     bool exmem_write = 0; //bool writing to idex = 1, not write if 0
 };
@@ -71,9 +74,12 @@ struct EXMEM {
 struct MEMWB {
     control_t control;
     uint32_t alu_result; //data to write to reg from alu??
+    uint32_t op; //for alu execute
+    uint32_t funct; //for update
     int rs; //rs register for hazard
     int rd; //rd register for hazard
     int rt; //rt register
+    uint32_t imm; //imm for reg write
     uint32_t data_rs; //reg 1 data 
     uint32_t data_rt; // reg 2 data
     uint32_t write_data; //for data for write
