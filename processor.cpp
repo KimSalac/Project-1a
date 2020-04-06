@@ -41,7 +41,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         cout << "\nPC: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // increment pc
         reg_file.pc += 4;
-        
+        //cout << "\nPC2: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         // TODO: fill in the function argument
         // decode into contol signals
         control.decode(instruction);
@@ -269,6 +269,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         }
         else if(op == 0 && funct == 8) // checks to see if it's jumpReg
         {
+          //cout<<"jump reg"<<endl;
           reg_file.pc = data_rs; // PC=R[rs]
         }
 
@@ -277,6 +278,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
 
         num_cycles++;
         num_instrs++; 
+        //cout << "\nPC-END: 0x" << std::hex << reg_file.pc << std::dec << "\n";
         //cout<<"# in: "<< num_instrs<<endl;
 
     }
