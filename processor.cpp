@@ -293,7 +293,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
     // Initialize ALU
     ALU alu;
     //Initialize Control
-    control_t control = {.reg_dest = 0, 
+        control_t control = {.reg_dest = 0, 
                         .jump = 0,
                         .branch = 0,
                         .mem_read = 0,
@@ -303,55 +303,14 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                         .ALU_src = 0,
                         .reg_write = 0,
                         .store_reg = 0,
-                        .sign_zero = 0
-                        };
+                        .load_reg = 0,
+                        .sign_zero = 0,
+                        .beq = 0};
     
     uint32_t num_cycles = 0;
     uint32_t num_instrs = 0; 
-    state_t current_state; /*={
-      .pc = (uint32_t)0,
-      .ifid = {
-        .instruction = (uint32_t)0,
-        .pc = (uint32_t)0},
-      .idex = {
-        .control = control,
-        .data_reg_1 = (uint32_t)0,
-        .data_reg_2 = (uint32_t)0,
-        .imm = (uint32_t)0,
-        .write_reg = 0},
-      .exmem = {
-        .control = control,
-        .alu_result = (uint32_t)0,
-        .mem_read_data = (uint32_t)0,
-        .mem_write_data = (uint32_t)0,
-        .write_reg = 0},
-      .memwb = {
-        .control = control,
-        .alu_result = (uint32_t)0,
-        .write_reg = 0}
-    }; */
-    state_t next_state; /*={
-      .pc = (uint32_t)0,
-      .ifid = {
-        .instruction = (uint32_t)0,
-        .pc = (uint32_t)0},
-      .idex = {
-        .control = control,
-        .data_reg_1 = (uint32_t)0,
-        .data_reg_2 = (uint32_t)0,
-        .imm = (uint32_t)0,
-        .write_reg = 0},
-      .exmem = {
-        .control = control,
-        .alu_result = (uint32_t)0,
-        .mem_read_data = (uint32_t)0,
-        .mem_write_data = (uint32_t)0,
-        .write_reg = 0},
-      .memwb = {
-        .control = control,
-        .alu_result = (uint32_t)0,
-        .write_reg = 0}
-    }; */
+    state_t current_state; 
+    state_t next_state; 
     int n = 0;
     while (current_state.pc != end_pc) {
       cout<<"\n------n: "<<n<<endl;
