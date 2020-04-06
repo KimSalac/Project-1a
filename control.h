@@ -95,11 +95,11 @@ struct control_t {
 
     if(beqne) //good: sets signals for all branch  instructions
 	{
-		if((instruction >> 26) == 0b000100)
+		if((instruction >> 26) == 0b000100) // beq
 		{
 			beq = 1;
 		}
-		else
+		else // bne
 		{
 			beq = 0;
 		}
@@ -111,6 +111,7 @@ struct control_t {
     if(load) //good: sets signals for all loads  instructions
 	{
 		mem_to_reg = 1;
+		mem_read = 1;
 		if((instruction >> 26) == 0b100100) // lbu
 		{
 			load_reg = 0b10;
@@ -122,16 +123,15 @@ struct control_t {
 		if((instruction >> 26) == 0b001111) // lui
 		{
 			mem_to_reg = 0;
+			mem_read = 0;
+			ALU_op = 0b11;
 		}
 		if((instruction >> 26) == 0b100011) // lw
 		{
 			load_reg = 0b00;
 		}
-
-	  mem_read = 1;
 	  ALU_src = 1;
 	  reg_write = 1;
-	  ALU_op = 0b00;
 	}
 
     if(store) //sets signals for all store  instructions
