@@ -326,8 +326,9 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<< "Instruction: " << current_state.ifid.instruction <<endl;
         next_state.ifid.instruction = current_state.ifid.instruction; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
-        if (next_state.pc  == end_pc){
-
+        if (next_state.pc  == end_pc){ //if the last insturction has been fetched  
+          cout<<"Next stage = pc"<<endl;
+          next_state.pc_write == 0;
         }
         num_instrs++; 
         //cout<<"# in: "<< num_instrs<<endl;
@@ -587,9 +588,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         }
 
        
-        if(next_state.pc == end_pc){ //if the last insturction has been fetched  
-        cout<<"Next stage = pc"<<endl;
-          next_state.pc_write == 0;
+        
           if(next_state.memwb.memwb_write == 1){ //if the next stage does not need to execute
             next_state.memwb.complete == 1; //stop the loop
           }
