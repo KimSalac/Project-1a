@@ -467,6 +467,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
        next_state.idex.data_rt = data_rt;
           next_state.idex.idex_write = 1; //go to next stage
           next_state.idex.print();
+
+          //hazard logic!!
+          if(current_state.idex.idex_write == 1 &&
+          ((current_state.exmem.rd == current_state.idex.rs) || current_state.exmem.rt == current_state.idex.rs)){
+            //???
+          }
+          
       }
        else{
         next_state.idex.idex_write = 0; //else dont do this stage again stage
