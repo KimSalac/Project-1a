@@ -414,10 +414,12 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             //data hazard rtypes
             cout<<"current state rt: "<< current_state.idex.rt<<endl;
             cout<<"current state rs: "<< current_state.idex.rs<<endl;
+            cout<<"current state rd: "<< current_state.idex.rd<<endl;
+            cout<<"current state imm: "<< current_state.idex.imm<<endl;
             cout<<"next state rt: "<< next_state.idex.rt<<endl;
             cout<<"next state rs: "<< next_state.idex.rs<<endl;
-            cout<<"current state rd: "<< current_state.idex.rd<<endl;
-            cout<<"next state rt: "<< next_state.idex.rt<<endl;
+            cout<<"next state rd: "<< next_state.idex.rd<<endl;
+            cout<<"next state imm: "<< next_state.idex.imm<<endl;
             if((current_state.idex.rt == next_state.idex.rs)
               ||(current_state.idex.rt == next_state.idex.rt)
               || (current_state.idex.rd == next_state.idex.rt)
@@ -459,9 +461,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"current state rt: "<< current_state.idex.rt<<endl;
           cout<<"current state rs: "<< current_state.idex.rs<<endl;
           cout<<"current state rd: "<< current_state.idex.rd<<endl;
+          cout<<"current state imm: "<< current_state.idex.imm<<endl;
           cout<<"next state rt: "<< next_state.idex.rt<<endl;
           cout<<"next state rs: "<< next_state.idex.rs<<endl;
           cout<<"next state rd: "<< next_state.idex.rd<<endl;
+          cout<<"next state imm: "<< next_state.idex.imm<<endl;
           if((current_state.idex.rt == next_state.idex.rs)
           || (current_state.idex.rd == next_state.idex.rs)){
            cout<<"DATA HAZARD! - current Itype"<<endl;
@@ -526,12 +530,47 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
          
         
        }
-       cout<<"data_rs!!: "<<data_rs<<endl;
+       //cout<<"data_rs!!: "<<data_rs<<endl;
        next_state.idex.data_rs = data_rs;
        next_state.idex.data_rt = data_rt;
           next_state.idex.idex_write = 1; //go to next stage
           next_state.idex.print();
-
+        //hazard logic 
+        cout<<"hazard check----"<<endl;
+          /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
+          cout<<"exmem current state rs: "<< current_state.exmem.rs<<endl;
+          cout<<"exmem state rd: "<< current_state.exmem.rd<<endl;
+          cout<<"exmem state imm: "<< current_state.exmem.imm<<endl; */
+          cout<<"memwb current state rt: "<< current_state.memwb.rt<<endl;
+          cout<<"memwb current state rs: "<< current_state.memwb.rs<<endl;
+          cout<<"memwb state rd: "<< current_state.memwb.rd<<endl;
+          cout<<"memwb state imm: "<< current_state.memwb.imm<<endl;
+          cout<<"next state rt: "<< next_state.idex.rt<<endl;
+          cout<<"next state rs: "<< next_state.idex.rs<<endl;
+          cout<<"next state rd: "<< next_state.idex.rd<<endl;
+          cout<<"next state imm: "<< next_state.idex.imm<<endl;
+        if ((next_state.idex.rs == current_state.memwb.rt)
+        || (next_state.idex.rt == current_state.memwb.rt)
+        || (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0)
+        || (next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0)){
+          cout<<"DECODE HAZARD"<<endl;
+          if ((next_state.idex.rs == current_state.memwb.rt)){ //if this instruction rs relies on a instuction 2 before (itype)
+              cout<<"forward rs - mem data (rt)"<<endl;
+              next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
+          }
+          if ((next_state.idex.rt == current_state.memwb.rt)){ //if this instruction rt relies on a instuction 2 before (itype)
+              cout<<"forward rt - mem data (rt)"<<endl;
+              next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
+          }
+          if ((next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0)){ //if this instruction rs relies on a instuction 2 before (rtype)
+              cout<<"forward rs - mem data (rd)"<<endl;
+              next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
+          }
+          if ((next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0)){ //if this instruction rt relies on a instuction 2 before (rtype)
+              cout<<"forward rt - mem data (rd)"<<endl;
+              next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
+          }
+        }
           //hazard logic!!
           //cout<<"exmem rs: "<<current_state.exmem.rs<<endl;
           /* if((next_state.idex.rs == current_state.exmem.rd) 
@@ -702,6 +741,46 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
           }
         }
+        //hazard forwarding 
+        cout<<"mem current state rt: "<< current_state.exmem.rt<<endl;
+        cout<<"mem current state rs: "<< current_state.exmem.rs<<endl;
+        cout<<"mem current state rd: "<< current_state.exmem.rd<<endl;
+        cout<<"idex next state rt: "<< next_state.idex.rt<<endl;
+        cout<<"idex next state rs: "<< next_state.idex.rs<<endl;
+        cout<<"idex next state rd: "<< next_state.idex.rd<<endl;
+        if(current_state.ifid.ifid_write == 1){ //if the decode stage has been run
+           if ((current_state.exmem.rt == next_state.idex.rs)
+        || (current_state.exmem.rt == next_state.idex.rt)
+        || (current_state.exmem.rd == next_state.idex.rs)
+        || (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0)){
+          cout<<"HAZARD MEM"<<endl;
+          /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
+          cout<<"exmem current state rs: "<< current_state.exmem.rs<<endl;
+          cout<<"exmem current state rd: "<< current_state.exmem.rd<<endl; */
+          if (current_state.exmem.rt == next_state.idex.rs){ //(if this instruction is itype), current rt == rs of instuction in decode 
+              cout<<"forward rs - mem rt"<<endl;
+              next_state.idex.data_rs = next_state.memwb.write_data; //forward the write data (i.e. rt) into rs
+              cout<<"next_state idex data rs: "<<next_state.idex.data_rs<<endl;
+              //not sure if this should be current or next state 
+          }
+          if(current_state.exmem.rt == next_state.idex.rt){ //if this instuction is itype, and current rt == rt 
+            cout<<"forward rt - mem rt"<<endl;
+            next_state.idex.data_rt = next_state.memwb.write_data; //forward the write data (i.e. rt) into rt
+            cout<<"next_state idex data rt: "<<next_state.idex.data_rt<<endl;
+          }
+          if(current_state.exmem.rd == next_state.idex.rs){//if this instruction is rtype, and current rd == rs
+            cout<<"forward rs - rd"<<endl;
+            next_state.idex.data_rs = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
+            cout<<"next_state idex data rs: "<<next_state.idex.data_rs<<endl;
+          }
+           if(current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0){//if this instruction is rtype, and current rd == rt (and that instruction is an rtype)
+            cout<<"forward rt - rd"<<endl;
+            next_state.idex.data_rt = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
+            cout<<"next_state idex data rt: "<<next_state.idex.data_rt<<endl;
+          }
+        }
+        }
+       
         //cout<<"data_write == "<<current_state.exmem.write_data<<endl;
         //cout<<"set mem controls"<<endl;
         next_state.memwb.control = current_state.exmem.control; //copy controls
