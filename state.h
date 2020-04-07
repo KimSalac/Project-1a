@@ -112,6 +112,7 @@ struct state_t {
     bool pc_write = 0; //1 to write to pc (fetch), 0 do not fetch
     bool hazard = 0; //1 if there is a hazard, 0 for no hazard 
     bool forwardrs = 0; //1 if should forward to rs; 0 dont 
+    bool forwardrt = 0; //1 if should forward to rt; 0 dont 
     
 };        
         
