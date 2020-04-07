@@ -5,7 +5,7 @@
 	.ent	__start
 	.type	__start, @function
 __start:
-   addi $1, $6, 2
+   addi $1, $6, 4
    addi $7, $7, 6
    addi $8, $8, 6
    addi $8, $8, 6
