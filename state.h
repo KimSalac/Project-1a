@@ -85,17 +85,31 @@ struct MEMWB {
     uint32_t write_data; //for data for write
     bool memwb_write = 0; //bool writing to idex = 1, not write if 0
     bool complete = 0; //bool for if the instruction is the last one, o for no, 1 for yes
+    void print(){
+        cout<<"control: "<<endl;
+        control.print();
+        cout<<"alu_result: "<<alu_result<<endl;
+        cout<<"data_rs: "<<data_rs<<endl;
+        cout<<"data_rt: "<<data_rt<<endl;
+        cout<<"rs: "<<rs<<endl;
+        cout<<"rt: "<<rt<<endl;
+        cout<<"rd: "<<rd<<endl;
+        cout<<"imm: "<<imm<<endl;
+        cout<<"write_data: "<<write_data<<endl;
+        cout<<"funct: "<<funct<<endl;
+        cout<<"op: "<<op<<endl;
+    }
 
 };
 
 struct state_t {
     //string state; //name of the state currently in
-    uint32_t pc;
+    uint32_t pc = 0;
     IFID ifid;
     IDEX idex;
     EXMEM exmem;
     MEMWB memwb;
-    bool pc_write = 1; //1 to write to pc (fetch), 0 do not fetch
+    bool pc_write = 0; //1 to write to pc (fetch), 0 do not fetch
     
 };        
         

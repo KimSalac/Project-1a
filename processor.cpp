@@ -311,47 +311,69 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
     uint32_t num_instrs = 0; 
     state_t current_state; 
     state_t next_state; 
-    //int n = 0;
+    int n = 0;
     while (current_state.memwb.complete == 0 ) {
+      //state_t next_state; 
       //cout<<"\n------n: "<<n<<endl;
       //cout<<"current state pc B: "<<current_state.pc<<endl;
       //cout<<"current state ifid in: "<<current_state.ifid.instruction<<endl;
      // cout<<"current state pc_write in: "<<current_state.pc_write<<endl;
+     if (current_state.pc  != end_pc){ //if the last insturction has been fetched  
+          cout<<"fetch set"<<endl;
+          current_state.pc_write = 1;
+        }
       if (current_state.pc_write == 1){//(current_state.ifid.instruction == 0){ //check for fetch stage? (or use pc write)
         cout<<"--fetch"<<endl;
         //fetch
-        memory.access(current_state.pc, current_state.ifid.instruction, 0, 1, 0);  //from the current state's pc, grab the insturction
+        //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
+        uint32_t in = current_state.ifid.instruction;
+        memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         // increment pc
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n";
-        //cout<< "Instruction: " << current_state.ifid.instruction <<endl;
-        next_state.ifid.instruction = current_state.ifid.instruction; //set next stages's ifid instruction value (since we will be going to that stage next)
+        cout<< "Instruction: " << in <<endl;
+        next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
+        //cout<< "Instruction2: " << next_state.ifid.instruction <<endl;
         next_state.pc += 4; //set up for next instruction fetch
         if (next_state.pc  == end_pc){ //if the last insturction has been fetched  
-          cout<<"Next stage = pc"<<endl;
+          cout<<"--------------Next stage = pc"<<endl;
           next_state.pc_write == 0;
         }
         num_instrs++; 
         //cout<<"# in: "<< num_instrs<<endl;
+       // cout<<"current state ifid write: "<<current_state.ifid.ifid_write<<endl;
+       //cout<<"change ifid write"<<endl;
         next_state.ifid.ifid_write = 1; //next cycle do next stage (id)
+
+      }
+      else{
+        next_state.ifid.ifid_write = 0; //else dont decode the next stage
       }
 
       //id stage
+      //cout<<"next state ifid write: "<<next_state.ifid.ifid_write<<endl;
+      //cout<<"current state ifid write: "<<current_state.ifid.ifid_write<<endl;
       if(current_state.ifid.ifid_write == 1){ //if this is id stage time
       cout<<"---decode"<<endl;
+      //cout<<"--n: "<<n<<endl;
+      cout<< "Instruction: " << current_state.ifid.instruction <<endl;
         uint32_t instruction = current_state.ifid.instruction;
         control.decode(instruction);
         control.print(); // used for autograding 
+        
         next_state.idex.control = control; //set the next state's control inputs 
+       
         /****get rs: good****/
         uint32_t rs_b = instruction << 6; //get rid of opcode
         rs_b = rs_b >> 27; //get rs
         int32_t rs_num = (int32_t) rs_b; //convert rs to int
+        
         next_state.idex.rs = rs_num; //set the rs reg # in the next state
         
         /****get rt: good****/
         uint32_t rt_b = instruction << 11; //get rid of opcode and rs
         rt_b = rt_b >>27; //get rt
         int rt_num = (int32_t) rt_b; //convert rt to int
+        
         next_state.idex.rt = rt_num; //set the rs reg # in the next state
 
          uint32_t data_rs = 0; //variable for data of rs
@@ -364,10 +386,14 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         /****get opcode & funct: good ****/
         uint32_t op = instruction >> 26; // gets op
         //cout << "op: "<< op <<endl; //prints opcode
+        
         next_state.idex.op = op;
+        
         uint32_t funct = instruction << 26; // gets funct (see next too)
         funct = funct >>26;
+        
         next_state.idex.funct = funct;
+        
         //cout<<"funct: "<<funct<<endl; //prints funct
 
         if (op == 0){ //if r-type
@@ -379,6 +405,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             {
               shamt = instruction << 21;
               shamt = shamt >> 27; //isolate shamt
+              
               next_state.idex.shamt = shamt; //set the shamt varaible 
             }
           
@@ -387,7 +414,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
 
           int16_t i = instruction & 0xFFFF;
           data_i = (int32_t) i;
-           next_state.idex.imm = data_i; //put in the imm for next state
+          
+          next_state.idex.imm = data_i; //put in the imm for next state
 
          if(control.sign_zero == 1) //logic operations
           {
@@ -403,20 +431,25 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             data_i = data_i << 16;
             data_i = data_i & 0xffff0000;
              std::bitset<32>  x(data_i);
+             
              next_state.idex.imm = data_i; //put in the imm for next state
           }
           else if(op == 0b101000 || op == 0b101001 || op == 0b101011) // sb, sh, sw
           {
             reg_file.access(rs_num, rt_num, data_rs, data_rt, 0, 0, data_write); //acess reg_file to get the data of rt
+            
             next_state.idex.write_data = data_rt; //put in value for next state
+            
             if(control.store_reg == 0b01) // sb
             {
               data_rt = data_rt & 0x000000ff; // only takes lower 8 bits
+              
               next_state.idex.write_data = data_rt; //put in value for next state
             }
             else if(control.store_reg == 0b00) // sh
             {
               data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
+              
               next_state.idex.write_data = data_rt; //put in value for next state
             }  
            // cout << "rt_data for stores: " << data_rt << endl;       
@@ -429,9 +462,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
          
         
        }
-         //next_state.idex.print();
           next_state.idex.idex_write = 1; //go to next stage
+          //next_state.idex.print();
       }
+       else{
+        next_state.idex.idex_write = 0; //else dont do this stage again stage
+      }
+
 
       //execution
       if(current_state.idex.idex_write == 1){
@@ -442,7 +479,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rt = current_state.idex.data_rt;
         uint32_t data_i = current_state.idex.imm;
         uint32_t shamt = current_state.idex.shamt;
-        alu.generate_control_inputs(current_state.idex.control.ALU_op, current_state.idex.funct, current_state.idex.op);
+        uint32_t alu_op = current_state.idex.control.ALU_op;
+        alu.generate_control_inputs(alu_op, funct, op);
         uint32_t alu_zero = 0;
         uint32_t alu_result = 0;
         bool alu_source = current_state.idex.control.ALU_src;
@@ -460,6 +498,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         }
         else //if itype
         {
+          //cout<<"itype"<<endl;
          if(!current_state.idex.control.branch)
           {
             /*if(control.mem_write == 1 || control.mem_read == 1)
@@ -467,6 +506,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               data_i = data_i << 2;
             }*/
             alu_result = alu.execute(data_rs, data_i, alu_zero);
+            //cout<<"alu result: "<<alu_result<<endl;
             //cout << "data_rs: " << data_rs << endl;
             //cout << "data_i: " << data_i << endl;
             //cout << "alu_result: " << alu_result << endl;
@@ -475,14 +515,16 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           {
             //cout << "got here" << endl;
             alu_result = alu.execute(data_rs, data_rt, alu_zero);
+            
           }
           
         }
 
         //data_write = alu_result;
+        //cout<<"data_write exe == "<<current_state.idex.write_data<<endl;
         next_state.exmem.control = current_state.idex.control; //copy controls
         next_state.exmem.alu_result = alu_result; //put the data that needs to be written in alu_result
-        next_state.exmem.write_data = current_state.idex.write_data; //put the data that needs to be written
+        next_state.exmem.write_data = alu_result; //put the data that needs to be written
         next_state.exmem.rt = current_state.idex.rt; //copy registers
         next_state.exmem.rs = current_state.idex.rs; //copy registers
         next_state.exmem.rd = current_state.idex.rd; //copy registers
@@ -493,6 +535,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.exmem.data_rt = current_state.idex.data_rt; //copy data of registers for reg access
         next_state.exmem.exmem_write = 1; //do next stage next cycle
       }
+       else{
+        next_state.exmem.exmem_write = 0; //else dont do the this stage again
+      }
+
 
 
       //memory
@@ -503,9 +549,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
 
+        next_state.memwb.write_data = data_write;
         next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
          if(current_state.exmem.control.mem_read == 1 || current_state.exmem.control.mem_write == 1)
         {
+          //cout<<"mem staging"<<endl;
           if(current_state.exmem.control.mem_write == 1) //stores
           {
             if(current_state.exmem.control.store_reg == 1) // sb
@@ -544,8 +592,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
           }
         }
+        //cout<<"data_write == "<<current_state.exmem.write_data<<endl;
+        //cout<<"set mem controls"<<endl;
         next_state.memwb.control = current_state.exmem.control; //copy controls
-        next_state.memwb.alu_result = alu_result; //put the data that needs to be written in alu_result
+        next_state.memwb.alu_result = current_state.exmem.alu_result; //put the data that needs to be written in alu_result
         next_state.memwb.data_rs = current_state.exmem.data_rs; //put the data that needs to be written
         next_state.memwb.rt = current_state.exmem.rt; //copy registers
         next_state.memwb.rs = current_state.exmem.rs; //copy registers
@@ -556,10 +606,14 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
       }
+      else{
+        next_state.memwb.memwb_write = 0; //else dont do the this stage again
+      }
 
       //write back
        if(current_state.memwb.memwb_write == 1){ //if we should write to this stage
        cout<<"--write back"<<endl;
+        //cout<<"data_write == "<<current_state.exmem.write_data<<endl;
         uint32_t data_rs = current_state.memwb.data_rs;
         uint32_t data_rt = current_state.memwb.data_rt;
         uint32_t rt_num = current_state.memwb.rt;
@@ -579,6 +633,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               reg_file.access(0, 0, data_rs, data_rs, rt_num, 1, data_write);
             }
             //cout<< "wrote to rt" <<endl;
+            //cout<<"data_write == "<<data_write<<endl;
+            
+            //current_state.memwb.print();
+          
           }
           else if(control.reg_dest == 1) //write to rd
           { 
@@ -589,10 +647,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
 
        
         
-          if(next_state.memwb.memwb_write == 1){ //if the next stage does not need to execute
-            next_state.memwb.complete == 1; //stop the loop
-          }
-        }
+          
+        
          //update pc
         if(current_state.memwb.control.branch == 1) // update proper branch address
         {
@@ -606,9 +662,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           //cout<<"jump reg"<<endl;
           next_state.pc = data_rs; // PC=R[rs]
         }
+        if (current_state.pc == end_pc){
+            cout<<"current state pc!!!!!!"<<endl;
+            next_state.memwb.complete = 1; //stop the loop
+        }
        }
-        
-
 
         cout << "CYCLE" << num_cycles << "\n";
         reg_file.print(); // used for automated testing
@@ -618,8 +676,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         current_state = next_state;
         //cout<<"next state pc2: "<<next_state.pc<<endl;
         //cout<<"current state pc2: "<<current_state.pc<<endl;
-        //n++;
-        cout<<"next stage comp: "<< next_state.memwb.complete<<endl;
+        n++;
+        //cout<<"next stage comp: "<< next_state.memwb.complete<<endl;
 
     }
 
