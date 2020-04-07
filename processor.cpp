@@ -462,8 +462,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
          
         
        }
+       cout<<"data_rs!!: "<<data_rs<<endl;
+       next_state.idex.data_rs = data_rs;
+       next_state.idex.data_rt = data_rt;
           next_state.idex.idex_write = 1; //go to next stage
-          //next_state.idex.print();
+          next_state.idex.print();
       }
        else{
         next_state.idex.idex_write = 0; //else dont do this stage again stage
@@ -505,6 +508,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             {
               data_i = data_i << 2;
             }*/
+            cout<<"data_rs: "<<data_rs<<endl;
+            cout<<"data_i: "<<data_i<<endl;
             alu_result = alu.execute(data_rs, data_i, alu_zero);
             //cout<<"alu result: "<<alu_result<<endl;
             //cout << "data_rs: " << data_rs << endl;
@@ -522,6 +527,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
 
         //data_write = alu_result;
         //cout<<"data_write exe == "<<current_state.idex.write_data<<endl;
+        cout<<"alu_result: "<<alu_result<<endl;
         next_state.exmem.control = current_state.idex.control; //copy controls
         next_state.exmem.alu_result = alu_result; //put the data that needs to be written in alu_result
         next_state.exmem.write_data = alu_result; //put the data that needs to be written
@@ -548,12 +554,12 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rs = current_state.exmem.data_rs;
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
-
+        cout<<"write data = "<<current_state.exmem.write_data<<endl;
         next_state.memwb.write_data = data_write;
         next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
          if(current_state.exmem.control.mem_read == 1 || current_state.exmem.control.mem_write == 1)
         {
-          //cout<<"mem staging"<<endl;
+          cout<<"mem staging"<<endl;
           if(current_state.exmem.control.mem_write == 1) //stores
           {
             if(current_state.exmem.control.store_reg == 1) // sb
@@ -579,7 +585,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           }
           else // if(current_state.exmem.control.mem_to_reg > 0) //loads
           {
+            cout<<"alu_result: "<<alu_result<<endl;
+            cout<<"data_write: "<<data_write<<endl;
+            cout<<"data_rt: "<<data_rt<<endl;
             memory.access(alu_result, data_write, data_rt, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); // regular load word
+            //??????? flip data_rt and data_write
+             cout<<"write data2 = "<<data_write<<endl;
+            next_state.memwb.write_data = data_write;
             if(current_state.exmem.control.load_reg == 0b10) // lbu
             {
               data_write = data_write & 0x000000ff;
@@ -662,7 +674,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           //cout<<"jump reg"<<endl;
           next_state.pc = data_rs; // PC=R[rs]
         }
-        if (current_state.pc == end_pc){
+        if (next_state.memwb.memwb_write == 0){ //if we will not perform this stage again end the cycle
             cout<<"current state pc!!!!!!"<<endl;
             next_state.memwb.complete = 1; //stop the loop
         }
