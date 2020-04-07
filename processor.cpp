@@ -469,9 +469,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           next_state.idex.print();
 
           //hazard logic!!
-          if(current_state.idex.idex_write == 1 &&
-          ((current_state.exmem.rd == current_state.idex.rs) || current_state.exmem.rt == current_state.idex.rs)){
+          if((current_state.idex.rs == current_state.exmem.rd) 
+          || (current_state.idex.rs == current_state.memwb.rd)
+          || (current_state.idex.rt == current_state.exmem.rd)
+          || (current_state.idex.rt == current_state.memwb.rd)){
             //???
+            next_state.ifid.ifid_write = 0; //dont decode
+            next_state.pc_write = 0; //dont fetch - MIGHT NOT WORK WITH THE WAY I HAVE THIS SET UP!!
           }
           
       }
