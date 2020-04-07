@@ -318,7 +318,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       //cout<<"current state pc B: "<<current_state.pc<<endl;
       //cout<<"current state ifid in: "<<current_state.ifid.instruction<<endl;
      // cout<<"current state pc_write in: "<<current_state.pc_write<<endl;
-     if (current_state.hazard == 0){ //(current_state.pc  != end_pc){ //if the last insturction has not been fetched  
+     if (current_state.pc  != end_pc){ //if the last insturction has not been fetched  
           cout<<"fetch set"<<endl;
           current_state.pc_write = 1;
         }
@@ -469,15 +469,25 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           next_state.idex.print();
 
           //hazard logic!!
-          if((current_state.idex.rs == current_state.exmem.rd) 
-          || (current_state.idex.rs == current_state.memwb.rd)
-          || (current_state.idex.rt == current_state.exmem.rd)
-          || (current_state.idex.rt == current_state.memwb.rd)){
+          //cout<<"exmem rs: "<<current_state.exmem.rs<<endl;
+          if((next_state.idex.rs == current_state.exmem.rd) 
+          || (next_state.idex.rs == current_state.memwb.rd)
+          || (current_state.idex.rt == next_state.idex.rs)
+          || (next_state.idex.rt == current_state.memwb.rd)){
             //???
             cout<<"DATA HAZARD!"<<endl;
-            next_state.hazard = 1;
-            next_state.ifid.ifid_write = 0; //dont decode
-            next_state.pc_write = 0; //dont fetch - MIGHT NOT WORK WITH THE WAY I HAVE THIS SET UP!!
+            if (current_state.idex.rt == next_state.idex.rs){ //check if rt of current value (in exe) is supposed to be rs for next insturction
+              cout<<"rs forward"<<endl;
+              current_state.forwardrs = 1; //forward the result of alu to rs
+            }
+            cout<<"idex rs: "<<next_state.idex.rs<<endl;
+            cout<<"idex rt: "<<next_state.idex.rt<<endl;
+            cout<<"exmem rd: "<<current_state.exmem.rd<<endl;
+            cout<<"memwb rd: "<<current_state.memwb.rd<<endl;
+            //next_state.hazard = 1;
+            //next_state.ifid.ifid_write = 0; //dont decode
+            //next_state.pc_write = 0; //dont fetch - MIGHT NOT WORK WITH THE WAY I HAVE THIS SET UP!!
+            //next_state.ifid = current_state
           }
           
       }
@@ -541,6 +551,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //data_write = alu_result;
         //cout<<"data_write exe == "<<current_state.idex.write_data<<endl;
         cout<<"alu_result: "<<alu_result<<endl;
+        if (current_state.forwardrs == 1){
+          cout<<"forward alu value"<<endl;
+          next_state.idex.data_rs = alu_result;
+        }
         next_state.exmem.control = current_state.idex.control; //copy controls
         next_state.exmem.alu_result = alu_result; //put the data that needs to be written in alu_result
         next_state.exmem.write_data = alu_result; //put the data that needs to be written
