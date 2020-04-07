@@ -312,7 +312,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
     state_t current_state; 
     state_t next_state; 
     //int n = 0;
-    while (current_state.pc != end_pc) {
+    while (current_state.memwb.complete == 0 ) {
       //cout<<"\n------n: "<<n<<endl;
       //cout<<"current state pc B: "<<current_state.pc<<endl;
       //cout<<"current state ifid in: "<<current_state.ifid.instruction<<endl;
@@ -326,6 +326,9 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<< "Instruction: " << current_state.ifid.instruction <<endl;
         next_state.ifid.instruction = current_state.ifid.instruction; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
+        if (next_state.pc  == end_pc){
+
+        }
         num_instrs++; 
         //cout<<"# in: "<< num_instrs<<endl;
         next_state.ifid.ifid_write = 1; //next cycle do next stage (id)
@@ -428,6 +431,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
          //next_state.idex.print();
           next_state.idex.idex_write = 1; //go to next stage
       }
+
       //execution
       if(current_state.idex.idex_write == 1){
         cout<<"--execution"<<endl;
@@ -582,7 +586,15 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           }
         }
 
-        //update pc
+       
+        if(next_state.pc == end_pc){ //if the last insturction has been fetched  
+        cout<<"Next stage = pc"<<endl;
+          next_state.pc_write == 0;
+          if(next_state.memwb.memwb_write == 1){ //if the next stage does not need to execute
+            next_state.memwb.complete == 1; //stop the loop
+          }
+        }
+         //update pc
         if(current_state.memwb.control.branch == 1) // update proper branch address
         {
           if(current_state.memwb.control.beq == (uint32_t) 0) // MIGHT BE WRONG! // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
@@ -608,6 +620,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<<"next state pc2: "<<next_state.pc<<endl;
         //cout<<"current state pc2: "<<current_state.pc<<endl;
         //n++;
+        cout<<"next stage comp: "<< next_state.memwb.complete<<endl;
 
     }
 

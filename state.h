@@ -84,6 +84,7 @@ struct MEMWB {
     uint32_t data_rt; // reg 2 data
     uint32_t write_data; //for data for write
     bool memwb_write = 0; //bool writing to idex = 1, not write if 0
+    bool complete = 0; //bool for if the instruction is the last one, o for no, 1 for yes
 
 };
 
