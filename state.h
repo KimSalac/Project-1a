@@ -110,6 +110,7 @@ struct state_t {
     EXMEM exmem;
     MEMWB memwb;
     bool pc_write = 0; //1 to write to pc (fetch), 0 do not fetch
+    bool hazard = 0; //1 if there is a hazard, 0 for no hazard 
     
 };        
         

@@ -318,7 +318,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       //cout<<"current state pc B: "<<current_state.pc<<endl;
       //cout<<"current state ifid in: "<<current_state.ifid.instruction<<endl;
      // cout<<"current state pc_write in: "<<current_state.pc_write<<endl;
-     if (current_state.pc  != end_pc){ //if the last insturction has been fetched  
+     if (current_state.hazard == 0){ //(current_state.pc  != end_pc){ //if the last insturction has not been fetched  
           cout<<"fetch set"<<endl;
           current_state.pc_write = 1;
         }
@@ -474,6 +474,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           || (current_state.idex.rt == current_state.exmem.rd)
           || (current_state.idex.rt == current_state.memwb.rd)){
             //???
+            cout<<"DATA HAZARD!"<<endl;
+            next_state.hazard = 1;
             next_state.ifid.ifid_write = 0; //dont decode
             next_state.pc_write = 0; //dont fetch - MIGHT NOT WORK WITH THE WAY I HAVE THIS SET UP!!
           }
