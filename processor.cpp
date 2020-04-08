@@ -334,6 +334,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         //cout<< "Instruction2: " << next_state.ifid.instruction <<endl;
         next_state.pc += 4; //set up for next instruction fetch
+        cout<<"next state pc = "<<next_state.pc<<endl;
         if (next_state.pc  == end_pc){ //if the last insturction has been fetched  
           cout<<"--------------Next stage = pc"<<endl;
           next_state.pc_write == 0;
@@ -565,10 +566,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"next state rs: "<< next_state.idex.rs<<endl;
           cout<<"next state rd: "<< next_state.idex.rd<<endl;
           cout<<"next state imm: "<< next_state.idex.imm<<endl;
-        if ((next_state.idex.rs == current_state.memwb.rt)
-        || (next_state.idex.rt == current_state.memwb.rt)
-        || (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0)
-        || (next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0)){
+          //make sure data hazards in mem are not branches b/c we dont want to set values based on branches
+        if ((next_state.idex.rs == current_state.memwb.rt && current_state.memwb.control.branch == 0)
+        || (next_state.idex.rt == current_state.memwb.rt && current_state.memwb.control.branch == 0)
+        || (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0 && current_state.memwb.control.branch == 0)
+        || (next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0 && current_state.memwb.control.branch == 0)){
           cout<<"DECODE HAZARD"<<endl;
           if ((next_state.idex.rs == current_state.memwb.rt)){ //if this instruction rs relies on a instuction 2 before (itype)
               cout<<"forward rs - mem data (rt)"<<endl;
@@ -674,6 +676,33 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.exmem.data_rs = current_state.idex.data_rs; //copy data of registers for reg access
         next_state.exmem.data_rt = current_state.idex.data_rt; //copy data of registers for reg access
         next_state.exmem.exmem_write = 1; //do next stage next cycle
+        //branch pc update
+         if(next_state.exmem.control.branch == 1) // update proper branch address
+            {
+              cout<<"branch"<<endl;
+              cout<<"beq: "<<next_state.exmem.control.beq<<endl;
+              cout<<"alu_zero: "<<alu_zero<<endl;
+              if((next_state.exmem.control.beq == 0 && alu_zero == 0) || (next_state.exmem.control.beq == 1 && alu_zero == 1)) // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
+              {
+                cout<<"current state pc: "<<current_state.pc<<endl;
+                cout<<"next state pc: "<<next_state.pc<<endl;
+                cout<<"data_i: "<<data_i<<endl;
+                next_state.pc = current_state.pc -4 + (data_i << 2); //is it current state or the pc of the branch instruction?
+                cout<<"pc set: "<<next_state.pc<<endl;
+                //flush
+                next_state.ifid.ifid_write = 0; //dont do decode
+                next_state.idex.idex_write = 0;// dont do ex 
+              }
+            }
+          else if(op == 0 && funct == 8) // checks to see if it's jumpReg
+          {
+            cout<<"jump reg"<<endl;
+            next_state.pc = data_rs; // PC=R[rs]
+            cout<<"pc set - jumpreg: "<<next_state.pc<<endl;
+            //flush
+            next_state.ifid.ifid_write = 0; //dont do decode
+            next_state.idex.idex_write = 0;// dont do ex 
+          }
       }
        else{
         next_state.exmem.exmem_write = 0; //else dont do the this stage again
@@ -763,10 +792,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         cout<<"idex next state rs: "<< next_state.idex.rs<<endl;
         cout<<"idex next state rd: "<< next_state.idex.rd<<endl;
         if(current_state.ifid.ifid_write == 1){ //if the decode stage has been run
-           if ((current_state.exmem.rt == next_state.idex.rs)
-        || (current_state.exmem.rt == next_state.idex.rt)
-        || (current_state.exmem.rd == next_state.idex.rs)
-        || (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0)){
+          //make sure its not a branch 
+           if ((current_state.exmem.rt == next_state.idex.rs && current_state.exmem.control.branch != 1)
+        || (current_state.exmem.rt == next_state.idex.rt && current_state.exmem.control.branch != 1)
+        || (current_state.exmem.rd == next_state.idex.rs && current_state.exmem.control.branch != 1 )
+        || (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0 && current_state.exmem.control.branch != 1)){
           cout<<"HAZARD MEM"<<endl;
           /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
           cout<<"exmem current state rs: "<< current_state.exmem.rs<<endl;
@@ -848,20 +878,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
           }
         }
-         //update pc
-        if(current_state.memwb.control.branch == 1) // update proper branch address
-        {
-          if(current_state.memwb.control.beq == (uint32_t) 0) // MIGHT BE WRONG! // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
-          {
-            next_state.pc = current_state.pc + (data_i << 2);
-          }
-        }
-        else if(op == 0 && funct == 8) // checks to see if it's jumpReg
-        {
-          //cout<<"jump reg"<<endl;
-          next_state.pc = data_rs; // PC=R[rs]
-        }
-        if (next_state.memwb.memwb_write == 0){ //if we will not perform this stage again end the cycle
+        if (next_state.memwb.memwb_write == 0 && next_state.pc == end_pc){ //if we will not perform this stage again end the cycle
             cout<<"current state pc!!!!!!"<<endl;
             next_state.memwb.complete = 1; //stop the loop
         }
@@ -872,6 +889,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         num_cycles++;
         //cout<<"current state pc: "<<current_state.pc<<endl;
         //cout<<"next state pc: "<<next_state.pc<<endl;
+        cout<<"next state pc = "<<next_state.pc<<endl;
         current_state = next_state;
         //cout<<"next state pc2: "<<next_state.pc<<endl;
         //cout<<"current state pc2: "<<current_state.pc<<endl;
