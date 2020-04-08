@@ -326,7 +326,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         cout<<"--fetch"<<endl;
         //fetch
         //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
-        uint32_t in = current_state.ifid.instruction;
+        uint32_t in; //= current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         // increment pc
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n";
@@ -533,8 +533,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
        //cout<<"data_rs!!: "<<data_rs<<endl;
        next_state.idex.data_rs = data_rs;
        next_state.idex.data_rt = data_rt;
-          next_state.idex.idex_write = 1; //go to next stage
-          next_state.idex.print();
+        next_state.idex.idex_write = 1; //go to next stage
+       next_state.idex.print();
         //hazard logic 
         cout<<"hazard check----"<<endl;
           /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
@@ -594,7 +594,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           } */
           
       }
-       else{
+      else{
         next_state.idex.idex_write = 0; //else dont do this stage again stage
       }
 
@@ -708,6 +708,23 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"mem staging"<<endl;
           if(current_state.exmem.control.mem_write == 1) //stores
           {
+            //hazard logic
+            //cout<<"before sw hazard"<<endl;
+            //cout<<"exmem next state rt: "<< current_state.exmem.rt<<endl;
+            //cout<<"exmem next state rs: "<< current_state.exmem.rs<<endl;
+            //cout<<"exmem next state rd: "<< current_state.exmem.rd<<endl;
+            if((current_state.memwb.rd == current_state.exmem.rt)
+            || current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ 
+              cout<<"store word Hazard"<<endl;
+              if(current_state.memwb.rd == current_state.exmem.rt){ //if prev inst rd (in wb) == sw rt 
+              cout<<"forward write data into data rt (rtype): "<<current_state.memwb.write_data<<endl;
+                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+              }
+              if(current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ //if prev inst rt (in wb) == sw rt && is itype
+              cout<<"forward write data into data rt (itype): "<<current_state.memwb.write_data<<endl;
+                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+              }
+            }
             if(current_state.exmem.control.store_reg == 1) // sb
             {
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
@@ -717,14 +734,19 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
             else if(current_state.exmem.control.store_reg == 0) // sh
             { 
+              cout << "data_rt: " << data_rt << endl;
+               cout << "data_write: " << data_write << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
+              //memory.print(alu_result/4, 1);
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
               data_write = data_write | data_rt; // replace rightmost 16 bits with rt
               memory.access(alu_result, data_write, data_write, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); // write modified value to memory
             }
             //next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
             else {
-              //cout << "data_rt: " << data_rt << endl;
+              cout << "data_rt: " << data_rt << endl;
+               cout << "data_write: " << data_write << endl;
+                cout << "alu_result: " << alu_result << endl;
               memory.access(alu_result, data_write, data_rt, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); 
             } 
             next_state.memwb.write_data = data_write; //put the value for rs into the reg
@@ -803,6 +825,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
+        //memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
@@ -842,11 +865,6 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
           }
         }
-
-       
-        
-          
-        
          //update pc
         if(current_state.memwb.control.branch == 1) // update proper branch address
         {
