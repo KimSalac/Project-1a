@@ -533,8 +533,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
        //cout<<"data_rs!!: "<<data_rs<<endl;
        next_state.idex.data_rs = data_rs;
        next_state.idex.data_rt = data_rt;
-          next_state.idex.idex_write = 1; //go to next stage
-          next_state.idex.print();
+        next_state.idex.idex_write = 1; //go to next stage
+       next_state.idex.print();
         //hazard logic 
         cout<<"hazard check----"<<endl;
           /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
@@ -594,7 +594,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           } */
           
       }
-       else{
+      else{
         next_state.idex.idex_write = 0; //else dont do this stage again stage
       }
 
@@ -699,6 +699,23 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"mem staging"<<endl;
           if(current_state.exmem.control.mem_write == 1) //stores
           {
+            //hazard logic
+            //cout<<"before sw hazard"<<endl;
+            //cout<<"exmem next state rt: "<< current_state.exmem.rt<<endl;
+            //cout<<"exmem next state rs: "<< current_state.exmem.rs<<endl;
+            //cout<<"exmem next state rd: "<< current_state.exmem.rd<<endl;
+            if((current_state.memwb.rd == current_state.exmem.rt)
+            || current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ 
+              cout<<"store word Hazard"<<endl;
+              if(current_state.memwb.rd == current_state.exmem.rt){ //if prev inst rd (in wb) == sw rt 
+              cout<<"forward write data into data rt (rtype): "<<current_state.memwb.write_data<<endl;
+                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+              }
+              if(current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ //if prev inst rt (in wb) == sw rt && is itype
+              cout<<"forward write data into data rt (itype): "<<current_state.memwb.write_data<<endl;
+                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+              }
+            }
             if(current_state.exmem.control.store_reg == 1) // sb
             {
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
@@ -833,11 +850,6 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
           }
         }
-
-       
-        
-          
-        
          //update pc
         if(current_state.memwb.control.branch == 1) // update proper branch address
         {
