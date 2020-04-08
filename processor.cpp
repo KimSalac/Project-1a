@@ -657,14 +657,23 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //data_write = alu_result;
         //cout<<"data_write exe == "<<current_state.idex.write_data<<endl;
         cout<<"alu_result: "<<alu_result<<endl;
-        if (current_state.forwardrs == 1){
+        if(current_state.idex.control.mem_read == 1) // if load instruction, stall
+        {
+          next_state.ifid.pc = current_state.ifid.pc - 4; //makes instruction at pc redo that instruction
+          next_state.ifid.instruction = current_state.ifid.instruction;
+        }
+        else
+        {
+          if (current_state.forwardrs == 1){
           cout<<"forward alu value RS"<<endl;
           next_state.idex.data_rs = alu_result;
-        }
-        if (current_state.forwardrt == 1){
+          }
+          if (current_state.forwardrt == 1){
           cout<<"forward alu value RT"<<endl;
           next_state.idex.data_rt = alu_result;
+          }
         }
+
         next_state.exmem.control = current_state.idex.control; //copy controls
         next_state.exmem.alu_result = alu_result; //put the data that needs to be written in alu_result
         next_state.exmem.write_data = alu_result; //put the data that needs to be written
