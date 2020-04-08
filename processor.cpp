@@ -326,7 +326,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         cout<<"--fetch"<<endl;
         //fetch
         //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
-        uint32_t in; //= current_state.ifid.instruction;
+        uint32_t in = current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         // increment pc
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n";
@@ -750,19 +750,14 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
             else if(current_state.exmem.control.store_reg == 0) // sh
             { 
-              cout << "data_rt: " << data_rt << endl;
-               cout << "data_write: " << data_write << endl;
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
-              //memory.print(alu_result/4, 1);
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
               data_write = data_write | data_rt; // replace rightmost 16 bits with rt
               memory.access(alu_result, data_write, data_write, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); // write modified value to memory
             }
             //next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
             else {
-              cout << "data_rt: " << data_rt << endl;
-               cout << "data_write: " << data_write << endl;
-                cout << "alu_result: " << alu_result << endl;
+              //cout << "data_rt: " << data_rt << endl;
               memory.access(alu_result, data_write, data_rt, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); 
             } 
             next_state.memwb.write_data = data_write; //put the value for rs into the reg
