@@ -411,7 +411,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               
               next_state.idex.shamt = shamt; //set the shamt varaible 
             }
-            //data hazard rtypes
+            //basic data hazard rtypes
             cout<<"current state rt: "<< current_state.idex.rt<<endl;
             cout<<"current state rs: "<< current_state.idex.rs<<endl;
             cout<<"current state rd: "<< current_state.idex.rd<<endl;
@@ -462,6 +462,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"current state rs: "<< current_state.idex.rs<<endl;
           cout<<"current state rd: "<< current_state.idex.rd<<endl;
           cout<<"current state imm: "<< current_state.idex.imm<<endl;
+          cout<<"current state exmem rt: "<< current_state.exmem.rt<<endl;
+          cout<<"current state exmem rs: "<< current_state.exmem.rs<<endl;
+          cout<<"current state exmem rd: "<< current_state.exmem.rd<<endl;
+          cout<<"current state exmem imm: "<< current_state.exmem.imm<<endl;
           cout<<"next state rt: "<< next_state.idex.rt<<endl;
           cout<<"next state rs: "<< next_state.idex.rs<<endl;
           cout<<"next state rd: "<< next_state.idex.rd<<endl;
@@ -484,6 +488,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             cout<<"change forward rs to 0"<<endl;
             current_state.forwardrs = 0;
           }
+          
          if(control.sign_zero == 1) //logic operations
           {
             data_i = instruction << 16; //gets immediate vales - zero extended
@@ -519,7 +524,18 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
               
               next_state.idex.write_data = data_rt; //put in value for next state
-            }  
+            }
+            //sw forward
+          if((next_state.idex.rs == current_state.idex.rt)
+          || (current_state.idex.rs == next_state.idex.rd)){
+            //if(next_state.idex.rs == current_state.idex.rt){
+              cout<<"Forward RS - SW"<<endl;
+              current_state.forwardrs = 1; //forward the result of alu to rs
+            //}
+          } 
+          else{
+            current_state.forwardrs = 0; //dont forward 
+          }
            // cout << "rt_data for stores: " << data_rt << endl;       
           }
           else // rest of regular arithmetic and and loads
@@ -825,7 +841,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-        //memory.print(alu_result/4, 1);
+        memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
