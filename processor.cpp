@@ -674,6 +674,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.exmem.data_rs = current_state.idex.data_rs; //copy data of registers for reg access
         next_state.exmem.data_rt = current_state.idex.data_rt; //copy data of registers for reg access
         next_state.exmem.exmem_write = 1; //do next stage next cycle
+
         //branch pc update
          if(next_state.exmem.control.branch == 1) // update proper branch address
             {
