@@ -3,16 +3,17 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
+#include <math.h>
 using namespace std;
 class ALU {
     private:
         int ALU_control_inputs;
     public:
-        // TODO:
+        // TODO:                                                                        
         // Generate the control inputs for the ALU
-        void generate_control_inputs(int ALU_op, int funct, int opcode) {        
+        void generate_control_inputs(int ALU_op, int funct, int opcode) { 
             if (opcode == 0){ // if rtype
-            //std::cout<<"funct: "<<std::bitset<32>funct<<std::endl;
+            //std::cout<<"funct: "<<funct<<std::endl;
                 if (funct ==  0b100000 || funct == 0b100001){ //rtype Add
                     ALU_control_inputs = 2;//0010;
                     //cout<< "rtype add" << endl;
@@ -47,9 +48,10 @@ class ALU {
                 {
                     ALU_control_inputs = 4;
                 }
+                /*same line as above
                 else if (funct ==  39){ //rtype nor
                     ALU_control_inputs = 3;
-                }
+                } */
             }
             else{ //I type and j type
             //std::cout<<"opcode: "<<opcode<<std::endl;
@@ -90,7 +92,8 @@ class ALU {
             }
             else if(ALU_control_inputs == 6){ //sub op
                 output =  operand_1 - operand_2;
-                if(output == 0)
+                int32_t compare = (int32_t) operand_1 - (int32_t) operand_2;
+                if(compare == 0)
                 {
                     ALU_zero = 1;
                 }
@@ -108,7 +111,10 @@ class ALU {
             }
             else if(ALU_control_inputs == 7){ //set less than op
                 //if a is less than b, output 1 else output 0
+                //cout<<"op1: "<<(int32_t) operand_1<<endl;
+                //cout<<"op2: "<<(int32_t) operand_2<<endl;
                 int32_t n =  (int32_t) operand_1 - (int32_t) operand_2; 
+                //cout<<"n: "<<n<<endl;
                 if (n < 0){
                     return 1;
                 }
@@ -117,10 +123,18 @@ class ALU {
                 }
             }
             else if(ALU_control_inputs == 12){ // srl
-                return operand_2 >> operand_1;
+                uint32_t temp = pow(2, operand_2);
+               // cout << "temp: " << temp << endl;
+                uint32_t result = operand_1/temp;
+               // cout << "result: " << result << endl;
+                return result;
             }
             else if(ALU_control_inputs == 4){ // sll
-                return operand_1 << operand_2;
+                uint32_t temp = pow(2, operand_2);
+              //  cout << "temp: " << temp << endl;
+                uint32_t result = operand_1*temp;
+              //  cout << "result: " << result << endl;
+                return result;
             }
             else if(ALU_control_inputs == 3){ // nor
                 uint32_t r = (operand_1) | (operand_2);
@@ -130,9 +144,9 @@ class ALU {
         return 0;
         }
         
-        /*void print(){ //print method to make sure the control singals are correct
+        void print(){ //print method to make sure the control singals are correct
             std::cout<<"alu control: " << ALU_control_inputs << std::endl;
-        }*/
+        }
             
 };
 #endif
