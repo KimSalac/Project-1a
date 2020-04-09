@@ -698,13 +698,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
          if(next_state.exmem.control.branch == 1) // update proper branch address
             {
               cout<<"branch"<<endl;
-              cout<<"beq: "<<next_state.exmem.control.beq<<endl;
-              cout<<"alu_zero: "<<alu_zero<<endl;
+              //cout<<"beq: "<<next_state.exmem.control.beq<<endl;
+              //cout<<"alu_zero: "<<alu_zero<<endl;
               if((next_state.exmem.control.beq == 0 && alu_zero == 0) || (next_state.exmem.control.beq == 1 && alu_zero == 1)) // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
               {
-                cout<<"current state pc: "<<current_state.pc<<endl;
-                cout<<"next state pc: "<<next_state.pc<<endl;
-                cout<<"data_i: "<<data_i<<endl;
+                //cout<<"current state pc: "<<current_state.pc<<endl;
+               // cout<<"next state pc: "<<next_state.pc<<endl;
+                //cout<<"data_i: "<<data_i<<endl;
                 next_state.pc = current_state.pc -4 + (data_i << 2); //is it current state or the pc of the branch instruction?
                 cout<<"pc set: "<<next_state.pc<<endl;
                 //flush
@@ -861,7 +861,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-        //memory.print(alu_result/4, 1);
+        memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
