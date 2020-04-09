@@ -46,7 +46,7 @@ void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
         // decode into contol signals
         control.decode(instruction);
         //cout<< "Instruction: " << instruction <<endl;
-        control.print(); // used for autograding 
+        //control.print(); // used for autograding 
         
         // TODO: fill in the function argument
         // Read from reg file
@@ -327,8 +327,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
         uint32_t in = current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
-        cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n"; // print out instruction PC
-        cout<< "Instruction: " << in <<endl;
+        cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec; // print out instruction PC
+        //cout<< "Instruction: " << in <<endl;
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
 
@@ -352,7 +352,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t instruction = current_state.ifid.instruction;
         //cout<<"instruction: "<<instruction<<endl;
         control.decode(instruction); //...decode instruction
-        control.print(); // used for autograding 
+        //control.print();  
         next_state.idex.instruction = instruction;
         next_state.idex.control = control; //set the next state's control inputs 
        
@@ -550,7 +550,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<<"data_rs3: "<<data_rs<<endl;
         next_state.idex.data_rs = data_rs;
         next_state.idex.idex_write = 1; //go to next stage
-        next_state.idex.print();
+        //next_state.idex.print();
         /*cout<<"hazard check----"<<endl;
            cout<<"memwb current state rt: "<< current_state.memwb.rt<<endl;
           cout<<"memwb current state rs: "<< current_state.memwb.rs<<endl;
@@ -732,7 +732,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
         //cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
-        current_state.exmem.control.print();
+        //current_state.exmem.control.print();
         //cout<<" alu_result (memory address) before doing anything: " << current_state.exmem.alu_result << endl;
         next_state.memwb.write_data = data_write;
         next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
@@ -863,7 +863,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-        memory.print(alu_result/4, 1);
+        //memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
@@ -914,7 +914,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         }
       }
 
-        cout << "CYCLE" << num_cycles << "\n";
+        cout << "\nCYCLE" << num_cycles << "\n";
         //cout << "\n" << "STATE OF REGISTER FILE AFTER WRITE BACK STAGE: " << endl;
         reg_file.print(); // used for automated testing
         num_cycles++;
