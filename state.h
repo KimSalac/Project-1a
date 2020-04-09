@@ -19,6 +19,7 @@ struct IFID {
 // IDEX Pipeline register
 //needs the read register data and extention of the imm to send to alu
 struct IDEX {
+    uint32_t instruction;
     control_t control;
     uint32_t data_rs; //reg 1 data 
     uint32_t data_rt; // reg 2 data
@@ -54,6 +55,7 @@ struct IDEX {
 //needs the data of the read regs to access memory
 struct EXMEM {
     control_t control;
+    uint32_t instruction;
     uint32_t alu_result; //take the result of ALU to use
     uint32_t write_data; //the data that should be written into memory
     int rs; //rs register for hazard
@@ -73,6 +75,7 @@ struct EXMEM {
 //needs data to write to reg and write reg #
 struct MEMWB {
     control_t control;
+    uint32_t instruction;
     uint32_t alu_result; //data to write to reg from alu??
     uint32_t op; //for alu execute
     uint32_t funct; //for update

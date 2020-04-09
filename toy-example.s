@@ -6,9 +6,9 @@
 	.type	__start, @function
 __start:
    loop: addi $6, $6, 4
-   addi $5, $1, 4
-   beq $5, $6, loop
-   addi $3, $5, 6
-   addi $7, $1, 6
+   add $5, $5, $6
+   addi $3, $1, 4
+   beq $3, $5, loop
+   addi $7, $1, 7
 	.end	__start
 	.size	__start, .-__start
