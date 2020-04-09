@@ -626,7 +626,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         { 
           if(funct == 2 || funct == 0) // if shift
           {
-            alu_result = alu.execute(data_rs, shamt, alu_zero);
+            alu_result = alu.execute(data_rt, shamt, alu_zero);
           }
           else // if regular r-type
           {
@@ -646,6 +646,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           }
           
         }
+        /*cout << "EXECUTION STAGE VARIABLES: " << endl;
+        cout << "data_rs: " << data_rs << endl; 
+        cout << "data_rt: " << data_rt << endl;
+        cout << "ALU_result: " << alu_result << endl;*/
         //data_write = alu_result;
         //cout<<"alu_result: "<<alu_result<<endl;
         if(current_state.idex.control.mem_read == 1) //HAZARD HANDLING FOR LOAD WORD - MUST STALL THE INSTRUCTION FROM MOVING INTO EXECUTION
