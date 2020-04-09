@@ -330,6 +330,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n"; // print out instruction PC
         cout<< "Instruction: " << in <<endl;
+        decode(in);
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
 
@@ -867,7 +868,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-        memory.print(alu_result/4, 1);
+        //memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again

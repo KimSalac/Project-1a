@@ -5,10 +5,6 @@ using namespace std;
 
 void decode(uint32_t instruction);
 
-int main() {
-  
-}
-
 void decode(uint32_t instruction) {
     uint32_t opcode = instruction >> 26;
     uint32_t funct = instruction & 0b111111;
