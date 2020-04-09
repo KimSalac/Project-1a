@@ -130,8 +130,11 @@ int main(int argc, char *argv[]) {
               if (processor_type == "single-cycle"){
                   processor_main_loop(reg_file, memory, end_pc);
               }
+              if(processor_type == " pipelined"){
+                   processor_main_loop_pipeline(reg_file, memory, end_pc);
+              }
               else{
-                  processor_main_loop_pipeline(reg_file, memory, end_pc);
+                 processor_main_loop_pipeline(reg_file, memory, end_pc);
               }
               
              break;
