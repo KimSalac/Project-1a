@@ -686,7 +686,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                 //cout<<"current state pc: "<<current_state.pc<<endl;
                // cout<<"next state pc: "<<next_state.pc<<endl;
                 //cout<<"data_i: "<<data_i<<endl;
-                next_state.pc = current_state.pc -4 + (data_i << 2); //is it current state or the pc of the branch instruction?
+                next_state.pc = current_state.pc - 4 + (data_i << 2); //is it current state or the pc of the branch instruction?
                // cout<<"pc set: "<<next_state.pc<<endl;
                 //flush
                 next_state.ifid.ifid_write = 0; //dont do decode
