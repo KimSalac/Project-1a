@@ -15,6 +15,7 @@ __start:
    lhu $5, 0($0)
    lw $7, 0($0)
    lui $8, 0x0023
-   add $12, $1, $2	
+   add $12, $1, $2
+   sll $19, $1, 2	
 	.end	__start
 	.size	__start, .-__start
