@@ -643,7 +643,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         { // if load instruction just executed, and its rt is either the rs and/or rt of the instruction in the decode stage, stall
           if(next_state.idex.rs == current_state.idex.rt || (next_state.idex.rt == current_state.idex.rt && next_state.idex.op == 0))
           {
-            next_state.ifid.pc = current_state.ifid.pc - 4; //makes instruction at pc redo that instruction
+            next_state.ifid.pc = next_state.ifid.pc - 4; //makes instruction at pc redo that instruction
+            next_state.ifid.instruction = current_state.ifid.instruction;
             next_state.idex.idex_write = 0;
             num_instrs--;
             cout << "Shit at pc :" << next_state.ifid.pc << "is stalled." << endl;
