@@ -327,13 +327,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
         uint32_t in = current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
-<<<<<<< Updated upstream
-        cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n"; // print out instruction PC
-        //cout<< "Instruction: " << in <<endl;
-=======
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec; // print out instruction PC
         cout<< "Instruction at fetch: " << std::hex << in <<endl;
->>>>>>> Stashed changes
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
 
@@ -354,11 +349,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       /*------------------------------DECODE--------------------------------*/
       if(current_state.ifid.ifid_write == 1){ //if there is an instruction to decode...
         uint32_t instruction = current_state.ifid.instruction;
-<<<<<<< Updated upstream
-=======
         cout<< "Instruction at decode: " << std::hex << instruction <<endl;
         //cout<<"instruction: "<<instruction<<endl;
->>>>>>> Stashed changes
         control.decode(instruction); //...decode instruction
         control.print(); // used for autograding 
         next_state.idex.instruction = instruction;
@@ -600,12 +592,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
 
       /*------------------------------EXECUTION--------------------------------*/
       if(current_state.idex.idex_write == 1){
-<<<<<<< Updated upstream
-        cout<<"--execution"<<endl;
-=======
         cout<< "Instruction at execution: " << std::hex << current_state.idex.instruction <<endl;
         //cout<<"------------Execution: ---------------"<<endl;
->>>>>>> Stashed changes
         uint32_t funct = current_state.idex.funct;
         uint32_t op = current_state.idex.op;
         uint32_t data_rs = current_state.idex.data_rs;
@@ -739,16 +727,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rs = current_state.exmem.data_rs;
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
-<<<<<<< Updated upstream
-        cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
-        current_state.exmem.control.print();
-        cout<<" alu_result (memory address) before doing anything: " << current_state.exmem.alu_result << endl;
-=======
         cout<< "Instruction at memory: " << std::hex << current_state.exmem.instruction <<endl;
         //cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
         //current_state.exmem.control.print();
         //cout<<" alu_result (memory address) before doing anything: " << current_state.exmem.alu_result << endl;
->>>>>>> Stashed changes
         next_state.memwb.write_data = data_write;
         next_state.memwb.data_rs = data_rs; //put the value for rs into the reg
 
@@ -878,12 +860,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-<<<<<<< Updated upstream
-        memory.print(alu_result/4, 1);
-=======
         next_state.memwb.instruction = current_state.exmem.instruction;
         //memory.print(alu_result/4, 1);
->>>>>>> Stashed changes
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
