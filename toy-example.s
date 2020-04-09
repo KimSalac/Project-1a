@@ -7,7 +7,9 @@
 __start:
    addi $6, $1, 4
    addi $5, $6, 12
-   add $3, $5, $6
-   add $7, $1, $6
+   addi $3, $1, 3
+   sw   $6, 0($5)
+   lw   $7, 0($5)
+   add  $9, $6, $7
 	.end	__start
 	.size	__start, .-__start
