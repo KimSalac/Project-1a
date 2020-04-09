@@ -319,12 +319,12 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       if(current_state.pc  != end_pc)
       {//if the last insturction has not been fetched  
           current_state.pc_write = 1;
-      }
-
-      /*------------------------------FETCH--------------------------------*/
-      if (current_state.pc_write == 1)
-      {
-        uint32_t in;
+        }
+      if (current_state.pc_write == 1){//(current_state.ifid.instruction == 0){ //check for fetch stage? (or use pc write)
+        cout<<"--fetch"<<endl;
+        //fetch
+        //cout<< "Instruction1: " << current_state.ifid.instruction <<endl;
+        uint32_t in = current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec << "\n"; // print out instruction PC
         cout<< "Instruction: " << in <<endl;
@@ -350,8 +350,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t instruction = current_state.ifid.instruction;
         control.decode(instruction); //...decode instruction
         control.print(); // used for autograding 
-        
-        next_state.idex.control = control; //set the next state's control inputs to prepare this instruciton for execution in the next cycle 
+        next_state.idex.instruction = instruction;
+        next_state.idex.control = control; //set the next state's control inputs 
        
         /****get rs: good****/
         uint32_t rs_b = instruction << 6; //get rid of opcode
@@ -394,49 +394,50 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               shamt = shamt >> 27; //isolate shamt
               next_state.idex.shamt = shamt; //set the shamt varaible 
             }
-
-            /*cout<<"current state rt: "<< current_state.idex.rt<<endl;
+            //basic data hazard rtypes
+            cout<<"current state rt: "<< current_state.idex.rt<<endl;
             cout<<"current state rs: "<< current_state.idex.rs<<endl;
             cout<<"current state rd: "<< current_state.idex.rd<<endl;
             cout<<"current state imm: "<< current_state.idex.imm<<endl;
             cout<<"next state rt: "<< next_state.idex.rt<<endl;
             cout<<"next state rs: "<< next_state.idex.rs<<endl;
             cout<<"next state rd: "<< next_state.idex.rd<<endl;
-            cout<<"next state imm: "<< next_state.idex.imm<<endl;()*/
-
-            //DATA HAZARD HANDLING if next instruction is r-type
-            if((current_state.idex.rt == next_state.idex.rs)
-              ||(current_state.idex.rt == next_state.idex.rt)
-              || (current_state.idex.rd == next_state.idex.rt)
-              || (current_state.idex.rd == next_state.idex.rs))
-            {
-
-              /*Handles if rs in next state equals both possibilities of destination registers*/
-              if (current_state.idex.rt == next_state.idex.rs && current_state.idex.op != 0){ //check if rt of current value (in exe) is supposed to be rs 
-               cout<<"Did forward value from rs ro rt"<<endl;
-                current_state.forwardrs = 1; //forward the result of alu to rs
+            cout<<"next state imm: "<< next_state.idex.imm<<endl;
+            if(instruction != 0){ //check for branch delay slot
+              if((current_state.idex.rt == next_state.idex.rs)
+                ||(current_state.idex.rt == next_state.idex.rt && current_state.idex.op != 0)
+                || (current_state.idex.rd == next_state.idex.rt)
+                || (current_state.idex.rd == next_state.idex.rs)){
+                cout<<"DATA HAZARD! - current Rtype"<<endl;
+                if (current_state.idex.rt == next_state.idex.rs ){ //check if rt of current value (in exe) is supposed to be rs 
+                  cout<<"rs forward - rt"<<endl;
+                  current_state.forwardrs = 1; //forward the result of alu to rs
+                }
+              if(current_state.idex.rd == next_state.idex.rs){ //if the next insturction needs rd (in exe now) for rs in next cycle
+                cout<<"rs forward - rd"<<endl;
+                current_state.forwardrs = 1;
+              }         
+                if (current_state.idex.rd == next_state.idex.rt){ //check if rd of last (rtype) needs to be forwarded
+                  cout<<"rt forward - rd"<<endl;
+                  current_state.forwardrt = 1; //forward the result of alu to rs
+                }
+                if(current_state.idex.rt == next_state.idex.rt && current_state.idex.op != 0){//check if rt of current value (in exe) needs to be in rt next instruction
+                  cout<<"rt forward - rt"<<endl;
+                  current_state.forwardrt = 1; //forward the result of alu to rt
+                }
               }
-              if(current_state.idex.rd == next_state.idex.rs && current_state.idex.op == 0){ //if the next insturction needs rd (in exe now) for rs in next cycle
-               cout<<"Did forward value from rs ro rd"<<endl;
-               current_state.forwardrs = 1;
+              //change back if not forward
+              else{
+                cout<<"change forward rs and rt to 0"<<endl;
+                current_state.forwardrt = 0;
+                current_state.forwardrs = 0;
               }
-
-              /*Handles if rt in next state equals both possibilities of destination registers*/
-              if (current_state.idex.rd == next_state.idex.rt && current_state.idex.op == 0){ //check if rd of last (rtype) needs to be forwarded
-                cout<<"Did forward value from rt ro rd"<<endl;
-                current_state.forwardrt = 1; //forward the result of alu to rs
-              }
-              if(current_state.idex.rt == next_state.idex.rt && current_state.idex.op != 0){//check if rt of current value (in exe) needs to be in rt next instruction
-                cout<<"Did forward value from rt ro rt"<<endl;
-                 current_state.forwardrt = 1; //forward the result of alu to rt
-              }
+            }else{
+               cout<<"change forward rs and rt to 0"<<endl;
+                current_state.forwardrs = 0;
+                current_state.forwardrt = 0;
             }
-            //change back if not forward
-            else
-            {
-              current_state.forwardrs = 0;
-              current_state.forwardrt = 0;
-            }  
+          
         }
         else
         { //if I type 
@@ -446,31 +447,43 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           
           next_state.idex.imm = data_i; //put in the imm for next state
           next_state.idex.rd = 0;
-
-
-          // DATA HAZARD HANDLING if next instruction is I-type
-          if((current_state.idex.rt == next_state.idex.rs)
-          || (current_state.idex.rd == next_state.idex.rs && current_state.idex.op == 0)) // second condition only applicable if current instruction is R-type
-          {
-            if(current_state.idex.rt == next_state.idex.rs && current_state.idex.op != 0){ //check if rt of current value (in exe) is supposed to be rs for next insturction
-              //cout<<"rs forward - rt"<<endl;
-              current_state.forwardrs = 1; //forward the result of alu to rs
+          //hazard logic for itypes!! - NOT STORES OR LOADS
+          cout<<"current state rt: "<< current_state.idex.rt<<endl;
+          cout<<"current state rs: "<< current_state.idex.rs<<endl;
+          cout<<"current state rd: "<< current_state.idex.rd<<endl;
+          cout<<"current state imm: "<< current_state.idex.imm<<endl;
+          // cout<<"current state exmem rt: "<< current_state.exmem.rt<<endl;
+          // cout<<"current state exmem rs: "<< current_state.exmem.rs<<endl;
+          // cout<<"current state exmem rd: "<< current_state.exmem.rd<<endl;
+          // cout<<"current state exmem imm: "<< current_state.exmem.imm<<endl;
+          cout<<"next state rt: "<< next_state.idex.rt<<endl;
+          cout<<"next state rs: "<< next_state.idex.rs<<endl;
+          cout<<"next state rd: "<< next_state.idex.rd<<endl;
+          cout<<"next state imm: "<< next_state.idex.imm<<endl;
+          if(instruction != 0){ //check for branch delay slot
+            if((current_state.idex.rt == next_state.idex.rs)
+            || (current_state.idex.rd == next_state.idex.rs)){
+            cout<<"DATA HAZARD! - current Itype"<<endl;
+              if (current_state.idex.rt == next_state.idex.rs){ //check if rt of current value (in exe) is supposed to be rs for next insturction
+                cout<<"rs forward - rt"<<endl;
+                current_state.forwardrs = 1; //forward the result of alu to rs
+              }
+              if (current_state.idex.rd == next_state.idex.rs){ //check if rd of last (rtype) needs to be forwarded
+                cout<<"rs forward - rd"<<endl;
+                current_state.forwardrs = 1; //forward the result of alu to rs
+              }
+            } 
+            //change the forward values back
+            else if((current_state.idex.rt != next_state.idex.rs)
+            || (current_state.idex.rd != next_state.idex.rs)){
+              cout<<"change forward rs to 0"<<endl;
+              current_state.forwardrs = 0;
             }
-            if(current_state.idex.rd == next_state.idex.rs && current_state.idex.op == 0){ //check if rd of last (rtype) needs to be forwarded
-              //cout<<"rs forward - rd"<<endl;
-              current_state.forwardrs = 1; //forward the result of alu to rs
-            }
-          } 
-          //change the forward values back
-          else if((current_state.idex.rt != next_state.idex.rs)
-          || (current_state.idex.rd != next_state.idex.rs))
-          {
-            //cout<<"change forward rs to 0"<<endl;
-            current_state.forwardrs = 0;
+          }else{
+             cout<<"change forward rs to 0"<<endl;
+              current_state.forwardrs = 0;
           }
-
-
-          //ACTUAL GETTING OF VALUES FROM REGISTER
+          
          if(control.sign_zero == 1) //logic operations
           {
             data_i = instruction << 16; //gets immediate vales - zero extended
@@ -504,6 +517,21 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               data_rt = data_rt & 0x0000ffff; // only takes lower 16 bits
               next_state.idex.write_data = data_rt; //put in value for next state
             }
+            //sw forward
+          if(instruction != 0){ //check for branch delay slot
+            if((next_state.idex.rs == current_state.idex.rt)
+            || (current_state.idex.rs == next_state.idex.rd)){
+              //if(next_state.idex.rs == current_state.idex.rt){
+                cout<<"Forward RS - SW"<<endl;
+                current_state.forwardrs = 1; //forward the result of alu to rs
+              //}
+            } 
+            else{
+              current_state.forwardrs = 0; //dont forward 
+            }
+          }else{
+            current_state.forwardrs = 0;
+          }
            // cout << "rt_data for stores: " << data_rt << endl;       
           }
           else // rest of regular arithmetic and and loads
@@ -523,40 +551,33 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           cout<<"next state rt: "<< next_state.idex.rt<<endl;
           cout<<"next state rs: "<< next_state.idex.rs<<endl;
           cout<<"next state rd: "<< next_state.idex.rd<<endl;
-          cout<<"next state imm: "<< next_state.idex.imm<<endl;*/
-
-        //HAZARD LOGIC
-        cout << "------------------------Testing 2 instructions before hazard logic --------------------------" << endl;
-        cout << (next_state.idex.rs == current_state.memwb.rt) << endl;
-        cout << (next_state.idex.rt == current_state.memwb.rt && next_state.memwb.op == 0) << endl;
-        cout << (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0) << endl;
-        cout << (next_state.idex.rt == current_state.memwb.rd && next_state.memwb.op == 0) << endl;
-        cout << "------------------------END HAZARD LOGIC TEST-----------------------" << endl;
-        if ((next_state.idex.rs == current_state.memwb.rt)
-        || (next_state.idex.rt == current_state.memwb.rt && next_state.memwb.op == 0)
-        || (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0)
-        || (next_state.idex.rt == current_state.memwb.rd && next_state.memwb.op == 0))
-        {
-          cout << "gets here" << endl;
-         // cout<<"DECODE HAZARD"<<endl;
-          if ((next_state.idex.rs == current_state.memwb.rt) && current_state.memwb.op != 0){ //if this instruction rs relies on a instuction 2 before (itype)
-              //cout<<"forward rs - mem data (rt)"<<endl;
-              next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
-          }
-          if ((next_state.idex.rt == current_state.memwb.rt) && current_state.memwb.op != 0){ //if this instruction rt relies on a instuction 2 before (itype)
-              //cout<<"forward rt - mem data (rt)"<<endl;
-              next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
-          }
-          if (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0){ //if this instruction rs relies on a instuction 2 before (rtype)
-              //cout<<"forward rs - mem data (rd)"<<endl;
-              next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
-          }
-          if (next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0){ //if this instruction rt relies on a instuction 2 before (rtype)
-              //cout<<"forward rt - mem data (rd)"<<endl;
-              next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
+          cout<<"next state imm: "<< next_state.idex.imm<<endl;
+          //make sure data hazards in mem are not branches b/c we dont want to set values based on branches
+        if(instruction != 0){ //check for branch delay slot
+          if ((next_state.idex.rs == current_state.memwb.rt && current_state.memwb.control.branch == 0)
+          || (next_state.idex.rt == current_state.memwb.rt && current_state.memwb.control.branch == 0)
+          || (next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0 && current_state.memwb.control.branch == 0)
+          || (next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0 && current_state.memwb.control.branch == 0)){
+            cout<<"DECODE HAZARD"<<endl;
+            if ((next_state.idex.rs == current_state.memwb.rt)){ //if this instruction rs relies on a instuction 2 before (itype)
+                cout<<"forward rs - mem data (rt)"<<endl;
+                next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
+            }
+            if ((next_state.idex.rt == current_state.memwb.rt)){ //if this instruction rt relies on a instuction 2 before (itype)
+                cout<<"forward rt - mem data (rt)"<<endl;
+                cout<<"current state memwb write data: "<<current_state.memwb.write_data<<endl;
+                next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
+            }
+            if ((next_state.idex.rs == current_state.memwb.rd && current_state.memwb.op == 0)){ //if this instruction rs relies on a instuction 2 before (rtype)
+                cout<<"forward rs - mem data (rd)"<<endl;
+                next_state.idex.data_rs = current_state.memwb.write_data; //put in the data that will be written this stage
+            }
+            if ((next_state.idex.rt == current_state.memwb.rd && current_state.memwb.op == 0)){ //if this instruction rt relies on a instuction 2 before (rtype)
+                cout<<"forward rt - mem data (rd)"<<endl;
+                next_state.idex.data_rt = current_state.memwb.write_data; //put in the data that will be written this stage
+            }
           }
         }
-          
       }
       else{
         next_state.idex.idex_write = 0; //else dont do this stage again
@@ -576,6 +597,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_i = current_state.idex.imm;
         uint32_t shamt = current_state.idex.shamt;
         uint32_t alu_op = current_state.idex.control.ALU_op;
+        next_state.exmem.instruction = current_state.idex.instruction;
         alu.generate_control_inputs(alu_op, funct, op);
         uint32_t alu_zero = 0;
         uint32_t alu_result = 0;
@@ -655,6 +677,33 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.exmem.data_rs = current_state.idex.data_rs; //copy data of registers for reg access
         next_state.exmem.data_rt = current_state.idex.data_rt; //copy data of registers for reg access
         next_state.exmem.exmem_write = 1; //do next stage next cycle
+        //branch pc update
+         if(next_state.exmem.control.branch == 1) // update proper branch address
+            {
+              cout<<"branch"<<endl;
+              //cout<<"beq: "<<next_state.exmem.control.beq<<endl;
+              //cout<<"alu_zero: "<<alu_zero<<endl;
+              if((next_state.exmem.control.beq == 0 && alu_zero == 0) || (next_state.exmem.control.beq == 1 && alu_zero == 1)) // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
+              {
+                //cout<<"current state pc: "<<current_state.pc<<endl;
+               // cout<<"next state pc: "<<next_state.pc<<endl;
+                //cout<<"data_i: "<<data_i<<endl;
+                next_state.pc = current_state.pc -4 + (data_i << 2); //is it current state or the pc of the branch instruction?
+                cout<<"pc set: "<<next_state.pc<<endl;
+                //flush
+                next_state.ifid.ifid_write = 0; //dont do decode
+                next_state.idex.idex_write = 0;// dont do ex 
+              }
+            }
+          else if(op == 0 && funct == 8) // checks to see if it's jumpReg
+          {
+            cout<<"jump reg"<<endl;
+            next_state.pc = data_rs; // PC=R[rs]
+            cout<<"pc set - jumpreg: "<<next_state.pc<<endl;
+            //flush
+            next_state.ifid.ifid_write = 0; //dont do decode
+            next_state.idex.idex_write = 0;// dont do ex 
+          }
       }
        else{
         next_state.exmem.exmem_write = 0; //else dont do the this stage again
@@ -663,9 +712,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       /*cout << "\n" << "STATE OF REGISTER FILE AFTER EXECUTE STAGE: " << endl;
       reg_file.print(); */
 
-      /*------------------------------MEMORY--------------------------------*/
-      if(current_state.exmem.exmem_write == 1)
-      {
+
+      //memory
+      if(current_state.exmem.exmem_write == 1){
+        cout<<"--memory"<<endl;
+        uint32_t instruction = current_state.exmem.instruction;
         uint32_t alu_result = current_state.exmem.alu_result;
         uint32_t data_rs = current_state.exmem.data_rs;
         uint32_t data_rt = current_state.exmem.data_rt;
@@ -683,23 +734,18 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           if(current_state.exmem.control.mem_write == 1) //stores
           {
             //hazard logic
-            //cout<<"before sw hazard"<<endl;
-            //cout<<"exmem next state rt: "<< current_state.exmem.rt<<endl;
-            //cout<<"exmem next state rs: "<< current_state.exmem.rs<<endl;
-            //cout<<"exmem next state rd: "<< current_state.exmem.rd<<endl;
-            if((current_state.memwb.rd == current_state.exmem.rt) //if R-type instruction's rt (R-type) requires value being written to R-type's rd (destination)
-            || (current_state.memwb.rd == current_state.exmem.rs) // //if R-type instruction's rt (R-type) requires value being written to R-type's rd (destination)
-            || (current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0)) //if R-type instruction's rt (source) requires value being written to I-type's rt (destination)
-            { 
-              //cout<<"store word Hazard"<<endl;
-              if(current_state.memwb.rd == current_state.exmem.rt)
-              { //if prev inst rd (in wb) == sw rt 
-              //cout<<"forward write data into data rt (rtype): "<<current_state.memwb.write_data<<endl;
-                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
-              }
-              if(current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ //if prev inst rt (in wb) == sw rt && is itype
-              //cout<<"forward write data into data rt (itype): "<<current_state.memwb.write_data<<endl;
-                data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+            if(instruction != 0){ //check for branch delay slot
+              if((current_state.memwb.rd == current_state.exmem.rt)
+              || current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ 
+                cout<<"store word Hazard"<<endl;
+                if(current_state.memwb.rd == current_state.exmem.rt){ //if prev inst rd (in wb) == sw rt 
+                cout<<"forward write data into data rt (rtype): "<<current_state.memwb.write_data<<endl;
+                  data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+                }
+                if(current_state.memwb.rt == current_state.exmem.rt && current_state.memwb.op != 0){ //if prev inst rt (in wb) == sw rt && is itype
+                cout<<"forward write data into data rt (itype): "<<current_state.memwb.write_data<<endl;
+                  data_rt = current_state.memwb.write_data; // set rt to the write data in memwb
+                }
               }
             }
 
@@ -714,7 +760,6 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             else if(current_state.exmem.control.store_reg == 0) // sh
             { 
               memory.access(alu_result, data_write, data_rt, 1, 0); // take value from memory
-              //memory.print(alu_result/4, 1);
               data_write = data_write & 0xffff0000; // get rid of rightmost 16 bits
               data_write = data_write | data_rt; // replace rightmost 16 bits with rt
               memory.access(alu_result, data_write, data_write, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); // write modified value to memory
@@ -747,31 +792,49 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
             next_state.memwb.write_data = data_write;
           }
-
-          //hazard forwarding
-          if(current_state.ifid.ifid_write == 1)
-          { //if the decode stage has been run
-            if ((current_state.exmem.rt == next_state.idex.rs)
-            || (current_state.exmem.rt == next_state.idex.rt)
-            || (current_state.exmem.rd == next_state.idex.rs)
-            || (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0))
-            {
-              if (current_state.exmem.rt == next_state.idex.rs && current_state.exmem.op != 0)
-              { //(if this instruction is itype), current rt == rs of instuction in decode
+        }
+        //hazard forwarding 
+        cout<<"mem current state rt: "<< current_state.exmem.rt<<endl;
+        cout<<"mem current state rs: "<< current_state.exmem.rs<<endl;
+        cout<<"mem current state rd: "<< current_state.exmem.rd<<endl;
+        cout<<"idex next state rt: "<< next_state.idex.rt<<endl;
+        cout<<"idex next state rs: "<< next_state.idex.rs<<endl;
+        cout<<"idex next state rd: "<< next_state.idex.rd<<endl;
+        cout<<"inst: "<< instruction<<endl;
+        //cout<<"idex next inst: "<< next_state.idex.instruction<<endl;
+        //cout<<"idex current inst: "<< current_state.idex.instruction<<endl;
+        if (instruction != 0 && next_state.idex.instruction != 0){ //check for branch delay slot
+          if(current_state.ifid.ifid_write == 1){ //if the decode stage has been run
+            //make sure its not a branch 
+            if ((current_state.exmem.rt == next_state.idex.rs && current_state.exmem.control.branch != 1)
+          || (current_state.exmem.rt == next_state.idex.rt && current_state.exmem.control.branch != 1)
+          || (current_state.exmem.rd == next_state.idex.rs && current_state.exmem.control.branch != 1 )
+          || (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op != 0 && current_state.exmem.control.branch != 1)){
+            //if (current_state.exmem.rd == next_state.idex.rt && next_state.idex.op != 0 && next_state.idex.control.branch == 1)
+            cout<<"HAZARD MEM"<<endl;
+            /* cout<<"exmem current state rt: "<< current_state.exmem.rt<<endl;
+            cout<<"exmem current state rs: "<< current_state.exmem.rs<<endl;
+            cout<<"exmem current state rd: "<< current_state.exmem.rd<<endl; */
+            if (current_state.exmem.rt == next_state.idex.rs){ //(if this instruction is itype), current rt == rs of instuction in decode 
+                cout<<"forward rs - mem rt"<<endl;
                 next_state.idex.data_rs = next_state.memwb.write_data; //forward the write data (i.e. rt) into rs
-              }
-              if(current_state.exmem.rt == next_state.idex.rt && current_state.exmem.op != 0)
-              { //if this instuction is itype, and current rt == rt 
-                next_state.idex.data_rt = next_state.memwb.write_data; //forward the write data (i.e. rt) into rt
-              }
-              if(current_state.exmem.rd == next_state.idex.rs && current_state.exmem.op == 0)
-              {//if this instruction is rtype, and current rd == rs
-                next_state.idex.data_rs = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
-              }
-              if(current_state.exmem.rd == next_state.idex.rt && next_state.idex.op == 0)
-              {//if this instruction is rtype, and current rd == rt (and that instruction is an rtype)
-                next_state.idex.data_rt = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
-              }
+                cout<<"next_state idex data rs: "<<next_state.idex.data_rs<<endl;
+                //not sure if this should be current or next state 
+            }
+            if(current_state.exmem.rt == next_state.idex.rt){ //if this instuction is itype, and current rt == rt 
+              cout<<"forward rt - mem rt"<<endl;
+              next_state.idex.data_rt = next_state.memwb.write_data; //forward the write data (i.e. rt) into rt
+              cout<<"next_state idex data rt: "<<next_state.idex.data_rt<<endl;
+            }
+            if(current_state.exmem.rd == next_state.idex.rs){//if this instruction is rtype, and current rd == rs
+              cout<<"forward rs - rd"<<endl;
+              next_state.idex.data_rs = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
+              cout<<"next_state idex data rs: "<<next_state.idex.data_rs<<endl;
+            }
+            if(current_state.exmem.rd == next_state.idex.rt && next_state.idex.op != 0){//if this instruction is rtype, and current rd == rt (and that instruction is an rtype)
+              cout<<"forward rt - rd"<<endl;
+              next_state.idex.data_rt = next_state.memwb.write_data; //forward this write data (i.e rd) into rs
+              cout<<"next_state idex data rt: "<<next_state.idex.data_rt<<endl;
             }
           }
         }
@@ -789,7 +852,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         next_state.memwb.imm =  current_state.exmem.imm; //copy imm
         next_state.memwb.data_rt = current_state.exmem.data_rt; //copy data of registers for reg access
         next_state.memwb.memwb_write = 1; //do next stage next cycle
-      
+        memory.print(alu_result/4, 1);
       }
       else{
         next_state.memwb.memwb_write = 0; //else dont do the this stage again
@@ -833,20 +896,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             reg_file.access(rs_num, rt_num, data_rs, data_rt, rd_num, 1, data_write);
           }
         }
-         //update pc
-        if(current_state.memwb.control.branch == 1) // update proper branch address
-        {
-          if(current_state.memwb.control.beq == (uint32_t) 0) // MIGHT BE WRONG! // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
-          {
-            next_state.pc = current_state.pc + (data_i << 2);
-          }
-        }
-        else if(op == 0 && funct == 8) // checks to see if it's jumpReg
-        {
-          //cout<<"jump reg"<<endl;
-          next_state.pc = data_rs; // PC=R[rs]
-        }
-        if (next_state.memwb.memwb_write == 0){ //if we will not perform this stage again end the cycle
+        if (next_state.memwb.memwb_write == 0 && next_state.pc == end_pc){ //if we will not perform this stage again end the cycle
+            cout<<"current state pc!!!!!!"<<endl;
             next_state.memwb.complete = 1; //stop the loop
         }
       }
@@ -857,6 +908,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         num_cycles++;
         //cout<<"current state pc: "<<current_state.pc<<endl;
         //cout<<"next state pc: "<<next_state.pc<<endl;
+        cout<<"next state pc = "<<next_state.pc<<endl;
         current_state = next_state;
         //cout<<"next state pc2: "<<next_state.pc<<endl;
         //cout<<"current state pc2: "<<current_state.pc<<endl;
