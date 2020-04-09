@@ -132,6 +132,7 @@ int main(int argc, char *argv[]) {
               }
               else{
                   processor_main_loop_pipeline(reg_file, memory, end_pc);
+                  
               }
               
              break;
