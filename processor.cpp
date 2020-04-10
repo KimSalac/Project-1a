@@ -9,6 +9,7 @@
 #include "control.h"
 #include <bitset>
 #include "state.h"
+#include "decode.cpp"
 using namespace std;
 
 void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc) {
@@ -329,6 +330,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec; // print out instruction PC
         //cout<< "Instruction from fetch: " << in <<endl;
+        //decode(in);
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
 
@@ -481,8 +483,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           else{ //change back b/c of branch delay slot
              //cout<<"change forward rs to 0"<<endl;
               current_state.forwardrs = 0;
-          }*/
-          
+          }
+          */
          if(control.sign_zero == 1) //logic operations
           {
             data_i = instruction << 16; //gets immediate vales - zero extended
@@ -602,6 +604,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         bool alu_source = current_state.idex.control.ALU_src;
         //cout << "Instruction from execution: " << current_state.idex.instruction <<endl;
 
+        //hazard 
+        if(current_state.idex.rs == current_state.exmem.rt){
+          data_rs = current_state.exmem.write_data;
+        }
         
 
         if (alu_source == 0 && !(funct == 8)) //if rtype except jumpreg
@@ -629,6 +635,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           
         }
         /*cout << "EXECUTION STAGE VARIABLES: " << endl;
+        cout<<"rs: "<<current_state.idex.rs<<endl;
+        cout<<"rt: "<<current_state.idex.rt<<endl;
         cout << "data_rs: " << data_rs << endl; 
         cout << "data_rt: " << data_rt << endl;
         cout << "ALU_result: " << alu_result << endl;*/
@@ -649,7 +657,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
           //Also, you wouldn't forward its alu_result if the current instruction is a load because it would be forwarding an address, which would not make sense
         } 
         else //if it is NOT a load, forward that shit
-        {
+        {*/
           if(current_state.forwardrs == 1)
           {
             //cout<<"Got here 1" <<endl;
@@ -660,7 +668,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             //cout<<"Got here 2" <<endl;
             next_state.idex.data_rt = alu_result;
           }
-        } */
+        //} 
 
         next_state.exmem.control = current_state.idex.control; //copy controls
         //cout << "----------Next instruction's control signals inside of execution stage:-----------" << endl;
@@ -688,13 +696,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                 //cout<<"current state pc: "<<current_state.pc<<endl;
                // cout<<"next state pc: "<<next_state.pc<<endl;
                 //cout<<"data_i: "<<data_i<<endl;
-                next_state.pc = pc + (data_i << 2); //is it current state or the pc of the branch instruction?
+                next_state.pc = pc  +(data_i << 2); //is it current state or the pc of the branch instruction?
                 //cout<<"pc set: "<<next_state.pc<<endl;
                 //flush
                 next_state.ifid.ifid_write = 0; //dont do decode
-                next_state.idex.clear();
+                //next_state.idex.clear();
                 next_state.idex.idex_write = 0;// dont do ex 
-                next_state.exmem.clear();
+                //next_state.exmem.clear();
               }
             }
           else if(op == 0 && funct == 8) // checks to see if it's jumpReg
@@ -709,6 +717,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
            
           }
           //memory.print(alu_result/4, 1);
+
       }
        else{
         next_state.exmem.exmem_write = 0; //else dont do the this stage again
