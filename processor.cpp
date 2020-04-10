@@ -353,7 +353,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       //cout<<"------------Decode: ---------------"<<endl;
         uint32_t instruction = current_state.ifid.instruction;
         uint32_t decoded_pc = current_state.ifid.pc; //current pc of instruction in decode
-        //cout << "Instruction in decode: "<< instruction << endl;
+        cout << "Instruction in decode: "<< instruction << endl;
         //cout << "PC of this instruction: " << decoded_pc << endl;
         control.decode(instruction); //...decode instruction
         //control.print();  
@@ -474,6 +474,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               if(next_state.idex.rt == current_state.idex.rt && next_state.idex.control.mem_write == 1 && next_state.idex.control.branch == 1 && current_state.idex.control.mem_write == 0 && current_state.idex.control.branch == 0 && current_state.idex.op != 0) // forwarding from an I-type ALU IF BRANCH
               { 
                 current_state.forwardrt = 1;
+              }
+              if(next_state.idex.rt == current_state.idex.rd && (next_state.idex.control.mem_write == 1 || next_state.idex.control.branch == 1 || next_state.idex.op==0) && current_state.idex.op==0) // forwarding from an R-type ALU
+              {
+                  current_state.forwardrt = 1;
               }
             } 
             else
@@ -598,8 +602,11 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             }
             if(next_state.idex.rs == current_state.exmem.rd && current_state.exmem.op == 0)
             { 
-               //cout<<"got here 3"<<endl;
-                next_state.idex.data_rs = current_state.exmem.write_data; 
+               cout<<"got here 3"<<endl;
+                next_state.idex.data_rs = current_state.exmem.write_data;
+                cout<<"got here 3"<<endl;
+               cout << "New data_rs value: " << next_state.idex.data_rs << endl;
+
             }
             if(next_state.idex.rt == current_state.exmem.rd && (current_state.exmem.op == 0) && (next_state.idex.control.mem_write==1 || next_state.idex.op == 0 || next_state.idex.control.branch == 1))
             {
@@ -769,7 +776,9 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rs = current_state.exmem.data_rs;
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
-        //cout << "Instruction from memory: " << instruction << endl;
+        
+        cout << "Instruction from memory: " << instruction << endl;
+        cout << "data being written to memory: " << data_write << endl;
         //cout<< "data_rt coming from execution: " << current_state.exmem.data_rt << endl;
         //cout<< "alu_result coming from execution: " << current_state.exmem.alu_result << endl;
         //cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
@@ -818,6 +827,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             else {
               //cout << "GOT HERE IN MEMORY: " << endl;
               memory.access(alu_result, data_write, data_rt, current_state.exmem.control.mem_read, current_state.exmem.control.mem_write); 
+
             } 
             //next_state.memwb.data_rs = data_rs; //put the value for rs into the reg; 
           }
@@ -836,6 +846,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               next_state.memwb.write_data = data_write; //put the value for rs into the reg
             }
             next_state.memwb.write_data = data_write;
+            cout << "Fetched data in memory: " << data_write << endl;
+            memory.print(alu_result/4, 1);
 
               if(next_state.idex.rs == current_state.exmem.rt && (current_state.exmem.control.mem_write==0 && current_state.exmem.control.branch == 0 && current_state.exmem.op != 0))
               {
