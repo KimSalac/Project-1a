@@ -337,7 +337,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         {  
           next_state.pc_write == 0; //...set next state's fetch stage as do nothing
         }
+        //if (in != 0){
         num_instrs++;
+        //}
+        
         next_state.ifid.ifid_write = 1; //in the next cycle, do id stage (id)
       }
       else// this bit might not make logical sense (DOUBLE CHECK)
@@ -351,9 +354,10 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       if(current_state.ifid.ifid_write == 1)
       { //if there is an instruction to decode...
       //cout<<"------------Decode: ---------------"<<endl;
+      
         uint32_t instruction = current_state.ifid.instruction;
         uint32_t decoded_pc = current_state.ifid.pc; //current pc of instruction in decode
-        //cout << "Instruction in decode: "<< instruction << endl;
+       // cout << "Instruction in decode: "<< instruction << endl;
         //cout << "PC of this instruction: " << decoded_pc << endl;
         control.decode(instruction); //...decode instruction
         //control.print();  
@@ -530,13 +534,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                     current_state.forwardrs = 1; //forward the result of alu to rs
                   //}
                 } 
-                else{
+                /*else{
                   current_state.forwardrs = 0; //dont forward 
                 }
               }
-              else{ //dont forward branch delay slot
+              /*else{ //dont forward branch delay slot
                 current_state.forwardrs = 0;
-              } */  
+              } */
             } //end of store word if 
             else if(control.branch)
             {
@@ -639,6 +643,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         alu.generate_control_inputs(alu_op, funct, op);
         uint32_t alu_zero = 0;
         uint32_t alu_result = 0;
+       
         bool alu_source = current_state.idex.control.ALU_src;
         //cout << "Instruction from execution: " << current_state.idex.instruction << endl;
         //cout << "data_rs in execution: " << data_rs << endl;
@@ -777,8 +782,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
         
-       // cout << "Instruction from memory: " << instruction << endl;
-        // cout << "data being written to memory: " << data_write << endl;
+        //cout << "Instruction from memory: " << instruction << endl;
+        //cout << "data being written to memory: " << data_write << endl;
         //cout<< "data_rt coming from execution: " << current_state.exmem.data_rt << endl;
         //cout<< "alu_result coming from execution: " << current_state.exmem.alu_result << endl;
         //cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
