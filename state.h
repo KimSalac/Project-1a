@@ -11,7 +11,7 @@
 // IFID Pipeline register, only contains instruction and pc + 1
 struct IFID {
     uint32_t instruction;
-    uint32_t pc; //pc+1?
+    uint32_t pc;
     bool ifid_write = 0; //write to ifid if 1; 0 do not
 };
 
@@ -21,6 +21,7 @@ struct IFID {
 struct IDEX {
     uint32_t instruction;
     control_t control;
+    uint32_t branch_pc = 0;
     uint32_t data_rs; //reg 1 data 
     uint32_t data_rt; // reg 2 data
     int rs; //rs register for hazard
