@@ -5,12 +5,14 @@
 	.ent	__start
 	.type	__start, @function
 __start:
-   addi  $1, $0, 5
-   addi  $2, $0, 10
-   addi  $5, $0, 1
-   addi  $7, $0, 3
-   addi  $10, $0, 4
-   addi  $11, $0, 13
-   add   $12, $1, $2
+   addi  $4, $1, 0x0002
+   addi  $2, $1, 0x0001
+   addi  $3, $1, 0x0004
+   addi  $2, $2, 0x0002
+   add  $3, $2, $1
+   sw    $4, 0($3)
+   lw    $5, 0($3)
+   addi  $4, $4, 0x000F
+   add   $6, $5, $5
 	.end	__start
 	.size	__start, .-__start
