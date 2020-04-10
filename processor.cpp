@@ -525,7 +525,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                 current_state.forwardrs = 0;
               } */  
             } //end of store word if 
-            else // rest of regular arithmetic and loads
+            else if(control.branch)// rest of regular arithmetic and loads
             {
               reg_file.access(rs_num, rt_num, data_rs, data_rt, rt_num, 0, 0);
               next_state.idex.data_rt = data_rt;
@@ -536,10 +536,15 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
               //cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
               //cout<<"data_rt to be moved into execution from decode: "<< data_rt << endl;
             }
+            else // rest of regular arithmetic and loads
+            {
+              reg_file.access(rs_num, 0, data_rs, data_rt, rt_num, 0, 0);
+              next_state.idex.data_rt = data_rt;
+            }
             next_state.idex.data_rs = data_rs;
             //cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
           } //end of itype if
-        
+        next_state.idex.data_rs = data_rs;
         next_state.idex.idex_write = 1; //go to next stage
 
         /******I THINK THIS IS GOOD*******/
