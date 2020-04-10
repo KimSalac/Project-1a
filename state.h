@@ -13,6 +13,7 @@ struct IFID {
     uint32_t instruction;
     uint32_t pc; //pc+1?
     bool ifid_write = 0; //write to ifid if 1; 0 do not
+    
 };
 
 // TODO:
@@ -20,6 +21,7 @@ struct IFID {
 //needs the read register data and extention of the imm to send to alu
 struct IDEX {
     uint32_t instruction;
+    uint32_t pc; //pc of this instruction
     control_t control;
     uint32_t data_rs; //reg 1 data 
     uint32_t data_rt; // reg 2 data
@@ -47,6 +49,34 @@ struct IDEX {
         cout<<"funct: "<<funct<<endl;
         cout<<"op: "<<op<<endl;
         cout<<"write_reg: "<<write_reg<<endl;
+    };
+    void clear(){
+        instruction = 0;
+        control = {.reg_dest = 0, 
+                        .jump = 0,
+                        .branch = 0,
+                        .mem_read = 0,
+                        .mem_to_reg = 0,
+                        .ALU_op = 0,
+                        .mem_write = 0,
+                        .ALU_src = 0,
+                        .reg_write = 0,
+                        .store_reg = 0,
+                        .load_reg = 0,
+                        .sign_zero = 0,
+                        .beq = 0};
+        data_rs = 0;
+        data_rt = 0;
+        rs = 0;
+        rt = 0; 
+        rd = 0; 
+        imm = 0;
+        shamt = 0;
+        write_data = 0;
+        funct = 0;
+        op = 0;
+        write_reg = 0; 
+        idex_write = 0;              
     }
 };
 
@@ -58,6 +88,7 @@ struct EXMEM {
     uint32_t instruction;
     uint32_t alu_result; //take the result of ALU to use
     uint32_t write_data; //the data that should be written into memory
+    uint32_t pc; //pc of this instruction
     int rs; //rs register for hazard
     int rd; //rd register for hazard
     int rt; //rt register
@@ -68,6 +99,34 @@ struct EXMEM {
     uint32_t imm; //imm for reg write
     int write_reg; //for reg write
     bool exmem_write = 0; //bool writing to idex = 1, not write if 0
+       void clear(){
+        instruction = 0;
+        control = {.reg_dest = 0, 
+                        .jump = 0,
+                        .branch = 0,
+                        .mem_read = 0,
+                        .mem_to_reg = 0,
+                        .ALU_op = 0,
+                        .mem_write = 0,
+                        .ALU_src = 0,
+                        .reg_write = 0,
+                        .store_reg = 0,
+                        .load_reg = 0,
+                        .sign_zero = 0,
+                        .beq = 0};
+        data_rs = 0;
+        data_rt = 0;
+        rs = 0;
+        rt = 0; 
+        rd = 0; 
+        imm = 0;
+        alu_result = 0;
+        write_data = 0;
+        funct = 0;
+        op = 0;
+        write_reg = 0; 
+        exmem_write = 0;              
+    }
 };
 
 // TODO:
@@ -101,7 +160,8 @@ struct MEMWB {
         cout<<"write_data: "<<write_data<<endl;
         cout<<"funct: "<<funct<<endl;
         cout<<"op: "<<op<<endl;
-    }
+    };
+
 
 };
 
