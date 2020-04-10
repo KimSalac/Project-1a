@@ -328,7 +328,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t in = current_state.ifid.instruction;
         memory.access(current_state.pc, in, 0, 1, 0);  //from the current state's pc, grab the insturction
         cout << "\nPC: 0x" << std::hex << current_state.pc << std::dec; // print out instruction PC
-        cout<< "Instruction from fetch: " << in << endl;
+       // cout<< "Instruction from fetch: " << in << endl;
         next_state.ifid.pc = current_state.pc;
         next_state.ifid.instruction = in; //set next stages's ifid instruction value (since we will be going to that stage next)
         next_state.pc += 4; //set up for next instruction fetch
@@ -353,8 +353,8 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
       //cout<<"------------Decode: ---------------"<<endl;
         uint32_t instruction = current_state.ifid.instruction;
         uint32_t decoded_pc = current_state.ifid.pc; //current pc of instruction in decode
-        cout << "Instruction in decode: "<< instruction << endl;
-        cout << "PC of this instruction: " << decoded_pc << endl;
+        //cout << "Instruction in decode: "<< instruction << endl;
+        //cout << "PC of this instruction: " << decoded_pc << endl;
         control.decode(instruction); //...decode instruction
         //control.print();  
         next_state.idex.instruction = instruction;
@@ -363,7 +363,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         if(next_state.idex.control.branch == 1) // detect if its a branch, if it is, save the pc of its instruction
         {
           next_state.idex.branch_pc = decoded_pc; //if instruction that was just decoded is a branch, save its pc and move it into execution
-          cout << "Branch pc is: " << next_state.idex.branch_pc << endl;
+          //cout << "Branch pc is: " << next_state.idex.branch_pc << endl;
         }
         else
         {
@@ -376,14 +376,14 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         rs_b = rs_b >> 27; //get rs
         int32_t rs_num = (int32_t) rs_b; //convert rs to int
         next_state.idex.rs = rs_num; //set the rs reg # in the next state
-        cout << "rs_num: " << rs_num << endl;
+        //cout << "rs_num: " << rs_num << endl;
         
         /****get rt: good****/
         uint32_t rt_b = instruction << 11; //get rid of opcode and rs
         rt_b = rt_b >>27; //get rt
         int rt_num = (int32_t) rt_b; //convert rt to int
         next_state.idex.rt = rt_num; //set the rs reg # in the next state
-        cout << "rt_num: " << rt_num << endl;
+        //cout << "rt_num: " << rt_num << endl;
 
         uint32_t data_rs = 0; //variable for data of rs
         uint32_t data_rt = 0; //varaible for data of rt
@@ -430,12 +430,12 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                 }
                 if(next_state.idex.rs == current_state.idex.rt && current_state.idex.control.branch == 0 && current_state.idex.op != 0) // forwarding from an I-type ALU
                 {  
-                  cout << "GOT HERE 1" << endl;
+                  //cout << "GOT HERE 1" << endl;
                   current_state.forwardrs = 1; //forward the result of alu to rs
                 }
                 if(next_state.idex.rt == current_state.idex.rt && current_state.idex.control.branch == 0 && current_state.idex.op != 0) // forwarding from an I-type ALU
                 {  
-                  cout << "GOT HERE 2" << endl;
+                  //cout << "GOT HERE 2" << endl;
                   current_state.forwardrt = 1; //forward the result of alu to rs
                 }
             }
@@ -529,15 +529,15 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
             {
               reg_file.access(rs_num, rt_num, data_rs, data_rt, rt_num, 0, 0);
               next_state.idex.data_rt = data_rt;
-              cout << "\nvalue in R[rs_num]: ";
-              reg_file.print(rs_num);
-              cout << "\nvalue in R[rt_num]: ";
-              reg_file.print(rt_num);
-              cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
-              cout<<"data_rt to be moved into execution from decode: "<< data_rt << endl;
+              //cout << "\nvalue in R[rs_num]: ";
+              //reg_file.print(rs_num);
+              //cout << "\nvalue in R[rt_num]: ";
+              //reg_file.print(rt_num);
+              //cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
+              //cout<<"data_rt to be moved into execution from decode: "<< data_rt << endl;
             }
             next_state.idex.data_rs = data_rs;
-            cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
+            //cout<<"data_rs to be moved into execution from decode: "<< data_rs <<endl;
           } //end of itype if
         
         next_state.idex.idex_write = 1; //go to next stage
@@ -593,13 +593,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t alu_zero = 0;
         uint32_t alu_result = 0;
         bool alu_source = current_state.idex.control.ALU_src;
-        cout << "Instruction from execution: " << current_state.idex.instruction << endl;
+        //cout << "Instruction from execution: " << current_state.idex.instruction << endl;
 
         
 
         if (op == 0 && !(funct == 8)) //if rtype except jumpreg
         { 
-          cout << "GOT HERE TO R-TYPE" << endl;
+          //cout << "GOT HERE TO R-TYPE" << endl;
           if(funct == 2 || funct == 0) // if shift
           {
             alu_result = alu.execute(data_rt, shamt, alu_zero);
@@ -611,16 +611,16 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         }
         else //if itype
         {
-          cout << "GOT HERE TO I-TYPE" << endl;
+          //cout << "GOT HERE TO I-TYPE" << endl;
          if(!current_state.idex.control.branch)
           {
             alu_result = alu.execute(data_rs, data_i, alu_zero); // this calculates address for loads, and values for registers for all other instructions
-            cout << "DATA_RS value " << data_rs << endl;
+            //cout << "DATA_RS value " << data_rs << endl;
           }
           else
           {
-            cout << "data_rs: " << data_rs << endl;
-            cout << "data_rt: " << data_rt << endl;
+            //cout << "data_rs: " << data_rs << endl;
+            //cout << "data_rt: " << data_rt << endl;
             alu_result = alu.execute(data_rs, data_rt, alu_zero);
           }
           
@@ -658,27 +658,27 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         {
           //cout<<"Got here 1" <<endl;
           next_state.idex.data_rs = alu_result;
-          cout << "FORWARDED RS VALUE FROM EXECUTION TO NEXT INSTRUCTION DECODE: " << alu_result;
+         //cout << "FORWARDED RS VALUE FROM EXECUTION TO NEXT INSTRUCTION DECODE: " << alu_result;
         }
         if (current_state.forwardrt == 1)
         {
           //cout<<"Got here 2" <<endl;
           next_state.idex.data_rt = alu_result;
-          cout << "FORWARDED RT VALUE FROM EXECUTION TO NEXT INSTRUCTION DECODE: " << alu_result;
+         // cout << "FORWARDED RT VALUE FROM EXECUTION TO NEXT INSTRUCTION DECODE: " << alu_result;
         }
 
         //branch pc update
-        cout << "IS THIS A BRANCH: " << current_state.idex.control.branch << endl;
+        //cout << "IS THIS A BRANCH: " << current_state.idex.control.branch << endl;
          if(current_state.idex.control.branch) // update proper branch address
           {
-              cout << "IS THIS A BRANCH EQUALS: " << current_state.idex.control.beq << endl;
-              cout << "DID IT RETURN TRUE: " << alu_zero << endl;
+              //cout << "IS THIS A BRANCH EQUALS: " << current_state.idex.control.beq << endl;
+              //cout << "DID IT RETURN TRUE: " << alu_zero << endl;
               if((current_state.idex.control.beq==1 && alu_zero==1) || (current_state.idex.control.beq==0 && alu_zero==0)) // true if beq = 0 & alu_zero = 0 OR beq = 1 & alu_zero = 1
               {
-                cout<<"Current state pc: "<<current_state.pc<<endl;
+                //cout<<"Current state pc: "<<current_state.pc<<endl;
                 next_state.pc = current_state.idex.branch_pc + 4 + (data_i << 2); //is it current state or the pc of the branch instruction?
-                cout << "Amount of instructions being jumped: " << data_i << endl;
-                cout<<"Next state pc: "<< next_state.pc<<endl;
+                //cout << "Amount of instructions being jumped: " << data_i << endl;
+                //cout<<"Next state pc: "<< next_state.pc<<endl;
                 //flush
                 next_state.ifid.ifid_write = 0; //dont do decode
                 next_state.idex.idex_write = 0;// dont do ex 
@@ -728,7 +728,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t data_rs = current_state.exmem.data_rs;
         uint32_t data_rt = current_state.exmem.data_rt;
         uint32_t data_write = current_state.exmem.write_data;
-        cout << "Instruction from memory: " << instruction << endl;
+        //cout << "Instruction from memory: " << instruction << endl;
         //cout << "-------------Next instructions control signals at this stage: ---------------" << endl;
         //current_state.exmem.control.print();
         //cout<<" alu_result (memory address) before doing anything: " << current_state.exmem.alu_result << endl;
@@ -869,7 +869,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         uint32_t funct = current_state.memwb.funct;
         uint32_t data_write = current_state.memwb.write_data;
         uint32_t data_i = current_state.memwb.imm;
-        cout << "Instruction from writeback: " << current_state.memwb.instruction << endl;
+        //cout << "Instruction from writeback: " << current_state.memwb.instruction << endl;
 
         if (current_state.memwb.control.reg_write == 1) // might need to fix
         {
