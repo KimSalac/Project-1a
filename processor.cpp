@@ -315,7 +315,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
     state_t next_state; 
     int n = 0;
 
-    while (current_state.memwb.complete == 0 ) {
+    while (n!=20){//current_state.memwb.complete == 0 ) {
      
       if(current_state.pc  != end_pc)
       {//if the last insturction has not been fetched  
@@ -695,13 +695,13 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
                 //cout<<"current state pc: "<<current_state.pc<<endl;
                // cout<<"next state pc: "<<next_state.pc<<endl;
                 //cout<<"data_i: "<<data_i<<endl;
-                next_state.pc = pc -4+ (current_state.idex.imm << 2); //is it current state or the pc of the branch instruction?
+                next_state.pc = pc +4 + (current_state.idex.imm << 2); //is it current state or the pc of the branch instruction?
                 cout<<"pc set: "<<next_state.pc<<endl;
                 //flush
                 next_state.ifid.ifid_write = 0; //dont do decode
-                //next_state.idex.clear();
+                next_state.idex.clear();
                 next_state.idex.idex_write = 0;// dont do ex 
-                //next_state.exmem.clear();
+                next_state.exmem.clear();
               }
             }
           else if(op == 0 && funct == 8) // checks to see if it's jumpReg
