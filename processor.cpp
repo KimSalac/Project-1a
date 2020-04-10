@@ -342,6 +342,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
         //}
         
         next_state.ifid.ifid_write = 1; //in the next cycle, do id stage (id)
+        next_state.ifid.pc = current_state.pc;
       }
       else// this bit might not make logical sense (DOUBLE CHECK)
       {
@@ -360,6 +361,7 @@ void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t 
        // cout << "Instruction in decode: "<< instruction << endl;
         //cout << "PC of this instruction: " << decoded_pc << endl;
         control.decode(instruction); //...decode instruction
+        next_state.idex.pc = current_state.ifid.pc;
         //control.print();  
         next_state.idex.instruction = instruction;
         next_state.idex.control = control; //set the next state's control inputs 
