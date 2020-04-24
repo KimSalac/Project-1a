@@ -18,6 +18,7 @@
 using namespace std;
 
 extern void processor_main_loop(Registers &reg_file, Memory &memory, uint32_t end_pc);
+extern void processor_main_loop_pipeline(Registers &reg_file, Memory &memory, uint32_t end_pc);
 
 /* Load Binary. */
 uint32_t load(char *bmk, Memory &memory)
@@ -126,7 +127,13 @@ int main(int argc, char *argv[]) {
           case 'p':
               // TODO: Redirect control to the appropriate processor implementation. 
               processor_type = string(optarg);
-              processor_main_loop(reg_file, memory, end_pc);
+              if (processor_type == "single-cycle"){
+                  processor_main_loop(reg_file, memory, end_pc);
+              }
+              else{
+                  processor_main_loop_pipeline(reg_file, memory, end_pc);
+              }
+              
              break;
       }
       }
